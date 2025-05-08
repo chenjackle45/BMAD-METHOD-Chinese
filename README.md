@@ -1,3 +1,5 @@
+[繁體中文版本](./README-chinese.md)
+
 # The BMAD-Method (Breakthrough Method of Agile (ai-driven) Development)
 
 ## Major Update: V2 Final Release
