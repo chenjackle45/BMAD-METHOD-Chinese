@@ -1,0 +1,67 @@
+# 文件分割計畫範本
+
+本計畫指引 PO/POSM agent 在 Librarian 階段，如何將大型來源文件拆分為較小且細緻的檔案。agent 會參考本計畫來辨識來源文件、需擷取的特定區段，以及分割後內容的目標檔名。
+
+---
+
+## 1. 來源文件：PRD（Project Requirements Document）
+*   **給 agent 的說明：** 請與使用者確認 PRD 的正確檔名（例如：`PRD.md`、`ProjectRequirements.md`）。
+
+### 1.1. Epic 細分
+-   **指示：** 對於 PRD 中辨識出的每個 Epic：
+-   **需複製的來源區段：** Epic 的完整內容，包括其主要描述、目標，以及該 Epic 下所有相關的 user stories 或詳細需求。
+-   **目標檔案格式：** `docs/epic-<id>.md`
+   
+### 1.2. 其他可能的 PRD 擷取內容（舉例）
+-   **需複製的來源區段：** 「User Personas」（若有且內容詳盡）。
+-   **目標檔案：** `docs/prd-user-personas.md`
+
+---
+
+## 2. 來源文件：主架構文件
+*   **給 agent 的說明：** 請與使用者確認正確檔名（例如：`architecture.md`、`SystemArchitecture.md`）。
+
+### 2.1. 核心架構細分
+-   **需複製的來源區段：** 關於「API Reference」、「API Endpoints」或「Service Interfaces」的區段。
+-   **目標檔案：** `docs/api-reference.md`
+
+-   **需複製的來源區段：** 關於「Coding Standards」、「Development Guidelines」或「Best Practices」的區段。
+-   **目標檔案：** `docs/coding-standards.md`
+
+-   **需複製的來源區段：** 關於「Data Models」、「Database Schema」、「Entity Definitions」的區段。
+-   **目標檔案：** `docs/data-models.md`
+
+-   **需複製的來源區段：** 關於「Environment Variables」、「Configuration Settings」、「Deployment Parameters」的區段。
+-   **目標檔案：** `docs/environment-vars.md`
+
+-   **需複製的來源區段：** 關於「Project Structure」的區段。
+-   **目標檔案：** `docs/project-structure.md`
+    -   *agent 說明：若專案包含多個 repository（非 monorepo），請確保此檔案明確描述每個相關 repository 的結構，或於必要時連結至子檔案。*
+
+-   **需複製的來源區段：** 關於「Technology Stack」、「Key Technologies」、「Libraries and Frameworks」的區段。
+-   **目標檔案：** `docs/tech-stack.md`
+
+-   **需複製的來源區段：** 關於「Testing Strategy」、「Testing Decisions」、「QA Processes」的區段。
+-   **目標檔案：** `docs/testing-decisions.md`
+
+---
+
+## 3. 來源文件：前端專屬文件
+*   **給 agent 的說明：** 請與使用者確認檔名（例如：`front-end-architecture.md`、`front-end-spec.md`、`ui-guidelines.md`）。前端文件可能有多份。
+
+### 3.1. 前端細分
+-   **需複製的來源區段：** 關於「Front-End Project Structure」的區段（若與主 `project-structure.md` 不同，例如獨立前端 repository 或複雜 monorepo FE workspace）。
+-   **目標檔案：** `docs/fe-project-structure.md`
+
+-   **需複製的來源區段：** 關於「UI Style Guide」、「Brand Guidelines」、「Visual Design Specifications」的區段。
+-   **目標檔案：** `docs/style-guide.md`
+
+-   **需複製的來源區段：** 關於「Component Library」、「Reusable UI Components Guide」、「Atomic Design Elements」的區段。
+-   **目標檔案：** `docs/component-guide.md`
+
+-   **需複製的來源區段：** 關於「Front-End Coding Standards」（專指 UI 開發，例如 JavaScript/TypeScript 風格、CSS 命名規則、前端可及性最佳實踐）的區段。
+-   **目標檔案：** `docs/front-end-coding-standards.md`
+
+---
+
+重要：**索引管理：** 每建立一個細分檔案後，請視需要更新 `docs/index.md`。

@@ -1,0 +1,351 @@
+# {Project Name} 架構文件
+
+## 目錄
+
+{ 若有新增或移除章節，請於此處更新 }
+
+- [技術摘要](#technical-summary)
+- [高階總覽](#high-level-overview)
+- [元件視圖](#component-view)
+  - [採用的架構／設計模式](#architectural--design-patterns-adopted)
+- [API 參考](#api-reference)
+  - [外部 API 使用](#external-apis-consumed)
+  - [{Another External Service Name} API](#another-external-service-name-api)
+  - [內部 API 提供（如適用）](#internal-apis-provided-if-applicable)
+- [資料模型](#data-models)
+  - [核心應用實體／領域物件](#core-application-entities--domain-objects)
+  - [API 載荷結構（如有區別）](#api-payload-schemas-if-distinct)
+  - [資料庫結構（如適用）](#database-schemas-if-applicable)
+  - [狀態檔案結構（如適用）](#state-file-schemas-if-applicable)
+- [核心工作流程／時序圖](#core-workflow--sequence-diagrams)
+- [最終技術棧選擇](#definitive-tech-stack-selections)
+- [基礎設施與部署概覽](#infrastructure-and-deployment-overview)
+- [錯誤處理策略](#error-handling-strategy)
+- [環境變數範本](#environment-vars-templates)
+  - [設定載入機制](#configuration-loading-mechanism)
+  - [必要變數](#required-variables)
+  - [環境變數備註](#env-var-notes)
+- [安全最佳實踐](#security-best-practices)
+- [測試策略](#testing-strategy)
+  - [整體理念與目標](#overall-philosophy--goals)
+  - [測試層級](#testing-levels)
+  - [特殊測試類型（如需可新增）](#specialized-testing-types-add-section-as-needed)
+  - [測試資料管理](#test-data-management)
+- [關鍵參考文件](#key-reference-documents)
+- [變更紀錄](#change-log)
+
+## 技術摘要
+
+{ 請簡要說明本系統架構、主要元件、技術選擇及所採用的架構模式。請參考 PRD 目標。 }
+
+## 高階總覽
+
+{ 說明主要架構風格（如 Monolith、Microservices、Serverless、Event-Driven），需反映 PRD 之決策。說明程式庫結構（Monorepo/Polyrepo）。以概念層級說明主要使用者互動或資料流。 }
+
+{ 請於此插入高階 mermaid 系統脈絡或互動圖，例如 Mermaid Class C4 Models Layer 1 與 2 }
+
+## 元件視圖
+
+{ 說明系統主要邏輯元件或服務及其職責，需反映所決定之整體架構（如獨立 microservices、單體內模組、monorepo 內套件）。並說明它們如何協作。 }
+
+- Component A: {職責說明}
+
+{如有助於理解，請於此插入元件圖，例如使用 Mermaid graph TD 或 C4 Model Container/Component Diagram}
+
+- Component N...: {職責說明}
+
+{ 如有助於理解，請於此插入元件圖，例如使用 Mermaid graph TD 或 C4 Model Container/Component Diagram }
+
+### 採用的架構／設計模式
+
+{ 列出本架構文件中選定的關鍵高階模式。這些基礎模式應於早期確立，作為元件設計、互動及技術選擇的依據。 }
+
+- **Pattern 1:** {如 Serverless、Event-Driven、Microservices、CQRS} - _理由／參考：_ {簡述原因，或如需可連結至更詳細說明}
+- **Pattern 2:** {如 Dependency Injection、Repository Pattern、Module Pattern} - _理由／參考：_ {...}
+- **Pattern N:** {...}
+
+## API 參考
+
+### 外部 API 使用
+
+{本系統與每個外部 API 互動時，請重複本節。}
+
+#### {External Service Name} API
+
+- **用途：** {本系統為何需使用此 API？}
+- **Base URL(s)：**
+  - Production: `{URL}`
+  - Staging/Dev: `{URL}`
+- **認證方式：** {請描述方式，如 API Key in Header（Header Name: `X-API-Key`）、OAuth 2.0 Client Credentials、Basic Auth。金鑰名稱請參考 `docs/environment-vars.md`。}
+- **主要使用端點：**
+  - **`{HTTP Method} {/path/to/endpoint}`:**
+    - 說明：{此端點功能為何？}
+    - 請求參數：{查詢參數、路徑參數}
+    - 請求主體結構：{可直接提供 JSON schema，或如結構極大／複雜可連結至 `docs/data-models.md` 詳細定義。}
+    - 請求範例：`{Code block}`
+    - 成功回應結構（Code: `200 OK`）：{可直接提供 JSON schema，或如極複雜可連結至 `docs/data-models.md` 詳細定義。}
+    - 錯誤回應結構（Codes: `4xx`, `5xx`）：{可直接提供 JSON schema，或如極複雜可連結至 `docs/data-models.md` 詳細定義。}
+    - 回應範例：`{Code block}`
+  - **`{HTTP Method} {/another/endpoint}`:** {...}
+- **速率限制：** {如已知}
+- **官方文件連結：** {URL}
+
+### {Another External Service Name} API
+
+{...}
+
+### 內部 API 提供（如適用）
+
+{若本系統有對外提供 API（如 microservices 架構或 UI 前端），請針對每個 API 重複本節。}
+
+#### {Internal API / Service Name} API
+
+- **用途：** {此 API 提供何種服務？}
+- **Base URL(s)：** {如 `/api/v1/...`}
+- **認證／授權：** {請說明存取控制方式。}
+- **端點：**
+  - **`{HTTP Method} {/path/to/endpoint}`:**
+    - 說明：{此端點功能為何？}
+    - 請求參數：{...}
+    - 請求主體結構：{可直接提供 JSON schema，或如極複雜可連結至 `docs/data-models.md` 詳細定義。}
+    - 成功回應結構（Code: `200 OK`）：{可直接提供 JSON schema，或如極複雜可連結至 `docs/data-models.md` 詳細定義。}
+    - 錯誤回應結構（Codes: `4xx`, `5xx`）：{可直接提供 JSON schema，或如極複雜可連結至 `docs/data-models.md` 詳細定義。}
+  - **`{HTTP Method} {/another/endpoint}`:** {...}
+
+## 資料模型
+
+### 核心應用實體／領域物件
+
+{定義本應用所處理的主要物件／概念。每個關鍵實體請重複本小節。}
+
+#### {Entity Name, e.g., User, Order, Product}
+
+- **說明：** {此實體代表什麼？}
+- **結構／介面定義：**
+  ```typescript
+  // 以 TypeScript Interface 為例
+  export interface {EntityName} {
+    id: string; // {說明，例如唯一識別碼}
+    propertyName: string; // {說明}
+    optionalProperty?: number; // {說明}
+    // ... 其他屬性
+  }
+  ```
+  _(或可使用 JSON Schema、class 定義或其他相關格式)_
+- **驗證規則：** {列出除基本型別外的特定驗證規則，如最大長度、格式、範圍等。}
+
+#### {Another Entity Name}
+
+{...}
+
+### API 載荷結構（如有區別）
+
+{僅當結構與核心實體有明顯區別且未於 API 參考節詳細說明時，於此定義。建議盡量於 API 端點說明時直接詳列請求／回應結構。本節適用於多個內部 API 共用或與核心持久化實體差異顯著的複雜可重用載荷結構。}
+
+#### {API Endpoint / Purpose, e.g., Create Order Request}
+
+- **結構／介面定義：**
+  ```typescript
+  // 範例
+  export interface CreateOrderRequest {
+    customerId: string;
+    items: { productId: string; quantity: number }[];
+    // ...
+  }
+  ```
+
+#### {Another API Payload}
+
+{...}
+
+### 資料庫結構（如適用）
+
+{如有使用資料庫，請於此定義資料表結構或文件型資料庫結構。}
+
+#### {Table / Collection Name}
+
+- **用途：** {此資料表儲存哪些資料？}
+- **結構定義：**
+  ```sql
+  -- SQL 範例
+  CREATE TABLE {TableName} (
+    id VARCHAR(36) PRIMARY KEY,
+    column_name VARCHAR(255) NOT NULL,
+    numeric_column DECIMAL(10, 2),
+    -- ... 其他欄位、索引、約束
+  );
+  ```
+  _(或可使用 ORM 模型定義、NoSQL 文件結構等)_
+
+#### {Another Table / Collection Name}
+
+{...}
+
+### 狀態檔案結構（如適用）
+
+{如應用程式有使用檔案持久化狀態，請於此說明。}
+
+#### {State File Name / Purpose, e.g., processed_items.json}
+
+- **用途：** {此檔案追蹤哪些狀態？}
+- **格式：** {如 JSON }
+- **結構定義：**
+  ```json
+  {
+    "type": "object",
+    "properties": {
+      "processedIds": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "已處理 ID 清單。"
+      }
+      // ... 其他狀態屬性
+    },
+    "required": ["processedIds"]
+  }
+  ```
+
+## 核心工作流程／時序圖
+
+{ 請以 mermaid 時序圖說明關鍵或複雜的工作流程。可包含全案高階流程，也可有 Epic 級別的時序圖。 }
+
+## 最終技術棧選擇
+
+{ 本節說明本專案最終確定的技術選擇。這些選擇應在充分理解專案需求、元件、資料模型與核心流程後做出。Architect Agent 應引導使用者討論並定案，並於下表中記錄每項選擇及其理由。
+
+本節需討論並最終定案的重點，並於下方詳細技術棧表格中展開，包含：
+
+- 前端首選範本：{ 如有使用，請填寫範本或起始專案網址 }
+- 後端首選範本：{ 如有使用，請填寫範本或起始專案網址 }
+- 主要語言及版本：{如 TypeScript 5.x、Python 3.11}
+- 主要執行環境及版本：{如 Node.js 22.x}
+
+必須為明確選擇，不得列出開放式選項（如爬蟲工具請擇一，不可多選）。請明確指定版本，或註明「Latest」，但如有相依性疑慮請謹慎使用「Latest」。 }
+
+| 類別                 | 技術                    | 版本／細節         | 說明／用途                             | 理由（選填）            |
+| :------------------- | :---------------------- | :---------------- | :-------------------------------------- | :----------------------- |
+| **語言**             | {如 TypeScript}         | {如 5.x}          | {後端／前端主要語言}                   | {為何選用此語言？}       |
+|                      | {如 Python}             | {如 3.11}         | {用於資料處理、ML}                     | {...}                    |
+| **執行環境**         | {如 Node.js}            | {如 22.x}         | {伺服器端執行環境}                     | {...}                    |
+| **框架**             | {如 NestJS}             | {如 10.x}         | {後端 API 框架}                        | {為何選用此框架？}       |
+|                      | {如 React}              | {如 18.x}         | {前端 UI 函式庫}                       | {...}                    |
+| **資料庫**           | {如 PostgreSQL}         | {如 15}           | {主要關聯式資料庫}                     | {...}                    |
+|                      | {如 Redis}              | {如 7.x}          | {快取、Session 儲存}                   | {...}                    |
+| **雲端平台**         | {如 AWS}                | {N/A}             | {主要雲端供應商}                       | {...}                    |
+| **雲端服務**         | {如 AWS Lambda}         | {N/A}             | {Serverless 計算服務}                  | {...}                    |
+|                      | {如 AWS S3}             | {N/A}             | {物件儲存（資產／狀態）}               | {...}                    |
+|                      | {如 AWS EventBridge}    | {N/A}             | {事件匯流排／排程任務}                 | {...}                    |
+| **基礎設施**         | {如 AWS CDK}            | {如 Latest}       | {基礎設施即程式碼工具}                 | {...}                    |
+|                      | {如 Docker}             | {如 Latest}       | {容器化}                               | {...}                    |
+| **UI 函式庫**        | {如 Material UI}        | {如 5.x}          | {React 元件庫}                         | {...}                    |
+| **狀態管理**         | {如 Redux Toolkit}      | {如 Latest}       | {前端狀態管理}                         | {...}                    |
+| **測試**             | {如 Jest}               | {如 Latest}       | {單元／整合測試框架}                   | {...}                    |
+|                      | {如 Playwright}         | {如 Latest}       | {端對端測試框架}                       | {...}                    |
+| **CI/CD**            | {如 GitHub Actions}     | {N/A}             | {持續整合／部署}                       | {...}                    |
+| **其他工具**         | {如 LangChain.js}       | {如 Latest}       | {LLM 互動函式庫}                       | {...}                    |
+|                      | {如 Cheerio}            | {如 Latest}       | {HTML 解析／爬蟲}                      | {...}                    |
+
+## 基礎設施與部署概覽
+
+- 雲端供應商：{如 AWS、Azure、GCP、本地端}
+- 主要服務：{請列出關鍵託管服務，如 Lambda、S3、Kubernetes Engine、RDS、Kafka}
+- 基礎設施即程式碼（IaC）：{所用工具，如 AWS CDK、Terraform...} - 位置：{IaC 程式碼儲存庫／目錄連結}
+- 部署策略：{如 CI/CD pipeline、手動部署步驟、藍綠部署、金絲雀部署} - 工具：{如 Jenkins、GitHub Actions、GitLab CI}
+- 環境：{請列出各環境，如 Development、Staging、Production}
+
+## 錯誤處理策略
+
+- **整體做法：** {如使用例外、回傳錯誤碼／元組、特定錯誤型別等。}
+- **日誌紀錄：**
+  - 函式庫／方式：{如 `console.log/error`、Python `logging` 模組、專用日誌函式庫}
+  - 格式：{如 JSON、純文字}
+  - 等級：{如 DEBUG、INFO、WARN、ERROR}
+  - 上下文：{需包含哪些情境資訊？}
+- **特定處理模式：**
+  - 外部 API 呼叫：{如使用 try-catch、檢查回應狀態碼、針對暫時性錯誤實作指數退避重試邏輯。}
+  - 內部錯誤：{如何處理非預期內部錯誤？有全域錯誤處理器嗎？還是元件層級處理？}
+  - 使用者顯示錯誤：{如何向使用者傳達錯誤？通用訊息？支援專用錯誤碼？}
+
+## 環境變數範本
+
+### 設定載入機制
+
+{請說明應用程式如何載入與存取環境變數（如以 `.env` 檔搭配 `dotenv` 函式庫、系統環境變數、雲端供應商設定服務等）。}
+
+### 必要變數
+
+{請列出應用程式執行所需的所有環境變數，若不同環境差異大請分組列示。請提供範例值或說明其代表意義。}
+
+- **`NODE_ENV`**: `development` | `staging` | `production` - _控制應用行為（如日誌等級、除錯功能）。_
+- **`API_BASE_URL`**: `http://localhost:3001/api` - _後端 API 基礎網址。_
+- **`DATABASE_URL`**: `postgresql://user:pass@host:port/db` - _主要資料庫連線字串。_
+- **`EXTERNAL_SERVICE_API_KEY`**: `{your_api_key}` - _{External Service Name} 的 API 金鑰。_
+- **`JWT_SECRET`**: `{a_very_strong_secret_key}` - _JWT 簽章密鑰。_
+- ...
+
+### 環境變數備註
+
+{有關環境變數的其他備註或慣例，如命名規則、取得方式，或敏感變數的安全注意事項。}
+
+## 安全最佳實踐
+
+{請概述需實施的關鍵安全措施與作法。}
+
+- **認證：** {所選方式，如 JWT、OAuth 2.0、SAML。Token 儲存、刷新機制。}
+- **授權：** {權限如何管理？RBAC？ABAC？}
+- **輸入驗證：** {於何處、如何驗證輸入（前端、後端）？所用函式庫？}
+- **資料保護：** {靜態／傳輸中加密？PII 處理？合規考量（GDPR、HIPAA）？}
+- **相依管理：** {相依套件更新策略？弱點掃描工具？}
+- **機密管理：** {API 金鑰、資料庫憑證等如何安全儲存與存取（如 AWS Secrets Manager、HashiCorp Vault、安全環境變數）？}
+- **常見弱點：** {請說明與本技術棧相關的 OWASP Top 10 風險及其防範措施（如 XSS、SQL Injection、CSRF）。}
+
+## 測試策略
+
+### 整體理念與目標
+
+{請說明本專案測試理念。主要目標為何（如確保正確性、防止回歸、促進重構、建立信心）？各測試層級比例如何？}
+
+### 測試層級
+
+{請詳述將實作的各類測試。}
+
+- **單元測試：**
+  - 範圍：{獨立函式、模組、元件。}
+  - 工具：{如 Jest、Mocha、PyTest、JUnit。}
+  - 覆蓋率目標（選填）：{如有特定目標請註明。}
+  - 位置：{如與原始碼同目錄（`*.test.js`）、獨立 `tests/unit` 目錄。}
+- **整合測試：**
+  - 範圍：{元件／模組間互動、API 端點（不含 UI）、服務間溝通。}
+  - 工具：{如 Jest 搭配 Supertest、PyTest 搭配 HTTPX、Spring Boot Test。}
+  - 重點：{驗證元件間契約、資料流、跨整合錯誤處理。}
+- **端對端（E2E）測試：**
+  - 範圍：{完整使用者流程（如有 UI）或完整 API 工作流。}
+  - 工具：{如 Playwright、Cypress、Selenium、Postman/Newman（API E2E）。}
+  - 重點：{模擬真實使用情境，驗證關鍵路徑。}
+- **其他測試類型（如適用）：**
+  - 效能測試：{工具、範圍。}
+  - 安全測試：{工具、範圍。}
+  - 無障礙測試（如有 UI）：{工具、範圍。}
+
+### 特殊測試類型（如需可新增）
+
+{如專案有特殊測試需求（如 microservices 契約測試、高流量 API 負載測試、特定合規測試），請於此詳述。}
+
+### 測試資料管理
+
+{測試資料如何建立、管理與重設？不同環境或測試類型有無特定策略？}
+
+## 關鍵參考文件
+
+{請列出其他重要文件連結，提供背景或詳細規格，如 PRD、UI/UX 規格、特定 API 文件、相關研究論文等。}
+
+- PRD: {連結或檔名}
+- UI/UX 規格: {連結或檔名，如適用}
+- {其他文件名稱}: {連結或檔名}
+
+## 變更紀錄
+
+| 變更 | 日期 | 版本 | 說明 | 作者 |
+| ---- | ---- | ---- | ---- | ---- |

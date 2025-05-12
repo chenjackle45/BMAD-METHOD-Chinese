@@ -1,0 +1,239 @@
+# Product Manager (PM) Requirements Checklist
+
+本檢查表為確保產品需求文件（PRD）及 Epic 定義完整、結構良好且適合 MVP 開發的全面性框架。PM 應於產品定義過程中系統性檢查每一項。
+
+## 1. PROBLEM DEFINITION & CONTEXT
+
+### 1.1 Problem Statement
+- [ ] 明確陳述所要解決的問題
+- [ ] 辨識遭遇該問題的對象
+- [ ] 解釋為何解決此問題很重要
+- [ ] 量化問題影響（如可行）
+- [ ] 與現有解決方案的差異
+
+### 1.2 Business Goals & Success Metrics
+- [ ] 明確、可衡量的商業目標
+- [ ] 訂立明確的成功指標與 KPI
+- [ ] 指標與用戶及商業價值連結
+- [ ] 已識別基準數據（如適用）
+- [ ] 達成目標的時程規劃
+
+### 1.3 User Research & Insights
+- [ ] 明確定義目標用戶角色
+- [ ] 記錄用戶需求與痛點
+- [ ] 摘要用戶研究發現（如有）
+- [ ] 包含競品分析
+- [ ] 提供市場背景
+
+## 2. MVP SCOPE DEFINITION
+
+### 2.1 Core Functionality
+- [ ] 明確區分必要功能與加分項
+- [ ] 功能直接對應問題陳述
+- [ ] 每個 Epic 皆對應特定用戶需求
+- [ ] 功能與 Story 以用戶視角描述
+- [ ] 定義成功的最低需求
+
+### 2.2 Scope Boundaries
+- [ ] 明確說明不在範圍內的內容
+- [ ] 包含未來擴充區段
+- [ ] 記錄範圍決策的理由
+- [ ] MVP 功能最小化但學習最大化
+- [ ] 範圍經多次檢討與精煉
+
+### 2.3 MVP Validation Approach
+- [ ] 定義 MVP 成功驗證方法
+- [ ] 規劃初步用戶回饋機制
+- [ ] 明確規範超越 MVP 的條件
+- [ ] 明確說明 MVP 學習目標
+- [ ] 設定時程預期
+
+## 3. USER EXPERIENCE REQUIREMENTS
+
+### 3.1 User Journeys & Flows
+- [ ] 記錄主要用戶流程
+- [ ] 識別每個流程的進入與離開點
+- [ ] 繪製決策點與分支
+- [ ] 標示關鍵路徑
+- [ ] 考慮邊界情境
+
+### 3.2 Usability Requirements
+- [ ] 記錄無障礙考量
+- [ ] 指定平台／裝置相容性
+- [ ] 以用戶角度定義效能期望
+- [ ] 說明錯誤處理與復原方式
+- [ ] 識別用戶回饋機制
+
+### 3.3 UI Requirements
+- [ ] 說明資訊架構
+- [ ] 識別關鍵 UI 元件
+- [ ] 參考視覺設計指引（如適用）
+- [ ] 指定內容需求
+- [ ] 定義高層級導覽結構
+
+## 4. FUNCTIONAL REQUIREMENTS
+
+### 4.1 Feature Completeness
+- [ ] 記錄 MVP 所需全部功能
+- [ ] 功能描述明確且以用戶為中心
+- [ ] 標示功能優先順序／重要性
+- [ ] 需求可測試且可驗證
+- [ ] 識別功能間依賴關係
+
+### 4.2 Requirements Quality
+- [ ] 需求具體且無歧義
+- [ ] 需求聚焦於「做什麼」而非「怎麼做」
+- [ ] 用詞一致
+- [ ] 複雜需求拆解為簡單部分
+- [ ] 技術術語最小化或有說明
+
+### 4.3 User Stories & Acceptance Criteria
+- [ ] Story 格式一致
+- [ ] 驗收標準可測試
+- [ ] Story 規模適中（不過大）
+- [ ] Story 儘量獨立
+- [ ] Story 包含必要背景
+- [ ] 相關後端／資料 Story 的 AC 有本地可測試需求（如 CLI）
+
+## 5. NON-FUNCTIONAL REQUIREMENTS
+
+### 5.1 Performance Requirements
+- [ ] 定義回應時間期望
+- [ ] 指定吞吐量／容量需求
+- [ ] 記錄可擴展性需求
+- [ ] 識別資源使用限制
+- [ ] 設定負載處理期望
+
+### 5.2 Security & Compliance
+- [ ] 指定資料保護需求
+- [ ] 定義認證／授權需求
+- [ ] 記錄合規需求
+- [ ] 說明安全測試需求
+- [ ] 處理隱私考量
+
+### 5.3 Reliability & Resilience
+- [ ] 定義可用性需求
+- [ ] 記錄備份與復原需求
+- [ ] 設定容錯期望
+- [ ] 指定錯誤處理需求
+- [ ] 包含維運與支援考量
+
+### 5.4 Technical Constraints
+- [ ] 記錄平台／技術限制
+- [ ] 說明整合需求
+- [ ] 識別第三方服務依賴
+- [ ] 指定基礎設施需求
+- [ ] 識別開發環境需求
+
+## 6. EPIC & STORY STRUCTURE
+
+### 6.1 Epic Definition
+- [ ] Epic 代表具凝聚力的功能單元
+- [ ] Epic 聚焦於用戶／商業價值
+- [ ] 明確說明 Epic 目標
+- [ ] Epic 規模適合漸進交付
+- [ ] 識別 Epic 順序與依賴
+
+### 6.2 Story Breakdown
+- [ ] Story 拆分規模適中
+- [ ] Story 具獨立價值
+- [ ] Story 有明確驗收標準
+- [ ] Story 依賴與順序有紀錄
+- [ ] Story 與 Epic 目標一致
+
+### 6.3 First Epic Completeness
+- [ ] 第一個 Epic 包含所有必要初始化步驟
+- [ ] 涵蓋專案腳手架與初始化
+- [ ] 包含核心基礎設施設置
+- [ ] 涵蓋開發環境設置
+- [ ] 儘早建立本地可測試性
+
+## 7. TECHNICAL GUIDANCE
+
+### 7.1 Architecture Guidance
+- [ ] 提供初步架構方向
+- [ ] 明確傳達技術限制
+- [ ] 識別整合點
+- [ ] 強調效能考量
+- [ ] 說明安全需求
+- [ ] 已標記高複雜度或高風險區域需架構深入探討
+
+### 7.2 Technical Decision Framework
+- [ ] 提供技術選擇決策標準
+- [ ] 關鍵決策有權衡說明
+- [ ] 關鍵設計／功能選擇有記錄選擇理由及替代方案
+- [ ] 強調不可妥協的技術需求
+- [ ] 識別需技術調查的區域
+- [ ] 提供技術債處理指引
+
+### 7.3 Implementation Considerations
+- [ ] 提供開發方式指引
+- [ ] 說明測試需求
+- [ ] 設定部署期望
+- [ ] 識別監控需求
+- [ ] 指定文件需求
+
+## 8. CROSS-FUNCTIONAL REQUIREMENTS
+
+### 8.1 Data Requirements
+- [ ] 識別資料實體與關聯
+- [ ] 指定資料儲存需求
+- [ ] 定義資料品質需求
+- [ ] 識別資料保留政策
+- [ ] 處理資料遷移需求（如適用）
+- [ ] 架構變更與 Story 需求連動規劃
+
+### 8.2 Integration Requirements
+- [ ] 識別外部系統整合
+- [ ] 記錄 API 需求
+- [ ] 指定整合認證需求
+- [ ] 定義資料交換格式
+- [ ] 說明整合測試需求
+
+### 8.3 Operational Requirements
+- [ ] 設定部署頻率期望
+- [ ] 定義環境需求
+- [ ] 識別監控與警示需求
+- [ ] 記錄支援需求
+- [ ] 指定效能監控方式
+
+## 9. CLARITY & COMMUNICATION
+
+### 9.1 Documentation Quality
+- [ ] 文件用語清晰且一致
+- [ ] 文件結構良好且有組織
+- [ ] 必要時定義技術術語
+- [ ] 適當加入圖表／視覺輔助
+- [ ] 文件有適當版本控管
+
+### 9.2 Stakeholder Alignment
+- [ ] 識別關鍵利害關係人
+- [ ] 納入利害關係人意見
+- [ ] 處理潛在分歧
+- [ ] 建立更新溝通計畫
+- [ ] 定義審核流程
+
+## PRD & EPIC VALIDATION SUMMARY
+
+### Category Statuses
+| 類別 | 狀態 | 關鍵問題 |
+|----------|--------|----------------|
+| 1. 問題定義與背景 | PASS/FAIL/PARTIAL | |
+| 2. MVP 範圍定義 | PASS/FAIL/PARTIAL | |
+| 3. 用戶體驗需求 | PASS/FAIL/PARTIAL | |
+| 4. 功能需求 | PASS/FAIL/PARTIAL | |
+| 5. 非功能性需求 | PASS/FAIL/PARTIAL | |
+| 6. Epic 與 Story 結構 | PASS/FAIL/PARTIAL | |
+| 7. 技術指引 | PASS/FAIL/PARTIAL | |
+| 8. 跨職能需求 | PASS/FAIL/PARTIAL | |
+| 9. 清晰度與溝通 | PASS/FAIL/PARTIAL | |
+
+### Critical Deficiencies
+- 列出所有必須於交付 Architect 前解決的關鍵問題
+
+### Recommendations
+- 針對每項缺失提供具體建議
+
+### Final Decision
+- **READY FOR ARCHITECT**：PRD 與 epic 完整、結構良好，已可進行架構設計。
+- **NEEDS REFINEMENT**：需求文件需補強以解決上述缺失。

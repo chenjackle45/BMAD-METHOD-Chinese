@@ -1,0 +1,149 @@
+# Frontend Architecture Document Review Checklist
+
+## 目的
+本檢查表供設計架構師於完成「Frontend Architecture Mode」並填寫 `front-end-architecture-tmpl.txt`（或 `.md`）文件後使用。確保所有章節皆有完整覆蓋並符合品質標準，方可定稿。
+
+---
+
+## I. Introduction
+
+- [ ] 是否於簡介中正確填寫 `{Project Name}`？
+- [ ] 是否有主架構文件的連結且正確？
+- [ ] 是否有 UI/UX 規格文件連結且正確？
+- [ ] 是否有主要設計檔案（Figma、Sketch 等）連結且正確？
+- [ ] 若適用且可用，是否有已部署的 Storybook／元件展示連結？
+
+## II. Overall Frontend Philosophy & Patterns
+
+- [ ] 是否明確說明所選框架與核心函式庫，且與主架構文件一致？
+- [ ] 是否明確描述元件架構（如 Atomic Design、Presentational/Container）？
+- [ ] 是否高層次說明狀態管理策略（如 Redux Toolkit、Zustand）？
+- [ ] 是否明確解釋資料流（如單向資料流）？
+- [ ] 是否明確定義樣式處理方式（如 CSS Modules、Tailwind CSS）？
+- [ ] 是否列出將採用的關鍵設計模式（如 Provider、Hooks）？
+- [ ] 此區塊是否與主架構文件的「明確技術棧選擇」一致？
+- [ ] 是否有考慮整體系統架構（monorepo/polyrepo、後端服務）的影響？
+
+## III. Detailed Frontend Directory Structure
+
+- [ ] 是否有提供前端應用程式資料夾結構的 ASCII 圖？
+- [ ] 圖示是否清楚、正確且反映所選框架／模式？
+- [ ] 是否有強調元件、頁面、服務、狀態、樣式等的組織慣例？
+- [ ] 是否有清楚說明特定慣例或結構設計理由的說明？
+
+## IV. Component Breakdown & Implementation Details
+
+### Component Naming & Organization
+- [ ] 是否有描述元件命名慣例（如 PascalCase）？
+- [ ] 是否明確說明元件於檔案系統的組織方式（如有需要可重申資料夾結構）？
+
+### Template for Component Specification
+- [ ] 「元件規格範本」本身是否完整且明確？
+  - [ ] 是否包含：用途、來源檔案、視覺參考？
+  - [ ] 是否有 Props 表格（名稱、型別、必填、預設值、說明）？
+  - [ ] 是否有內部狀態表格（變數、型別、初始值、說明）？
+  - [ ] 是否有關鍵 UI 元素／結構區塊（文字或 pseudo-HTML）？
+  - [ ] 是否有處理／觸發事件區塊？
+  - [ ] 是否有觸發動作（狀態管理、API 呼叫）區塊？
+  - [ ] 是否有樣式說明區塊？
+  - [ ] 是否有無障礙說明區塊？
+- [ ] 是否明確聲明此範本應用於大多數功能性元件？
+
+### Foundational/Shared Components (if any specified upfront)
+- [ ] 若有指定基礎／共用 UI 元件，是否遵循「元件規格範本」？
+- [ ] 是否明確說明提前指定這些元件的理由？
+
+## V. State Management In-Depth
+
+- [ ] 是否重申所選狀態管理方案，並簡要說明理由（如主架構文件未完整說明）？
+- [ ] 是否明確定義 Store 結構／Slice 慣例（如存放位置、依功能切分）？
+- [ ] 若有提供核心 Slice 範例（如 `sessionSlice`）：
+  - [ ] 其用途是否明確？
+  - [ ] 是否有定義狀態結構（如 TypeScript interface）？
+  - [ ] 是否列出關鍵 Reducer／Action？
+- [ ] 是否有提供功能 Slice 範本，說明用途、狀態結構與關鍵 Reducer／Action？
+- [ ] 是否有說明關鍵 Selector 慣例（如使用 `createSelector`）？
+- [ ] 是否有提供核心 Slice 的關鍵 Selector 範例？
+- [ ] 是否有說明關鍵 Action／Reducer／Thunk（特別是非同步）的慣例？
+- [ ] 是否有提供核心 Action/Thunk 範例（如 `authenticateUser`），並說明其用途與 dispatch 流程？
+- [ ] 是否有提供功能性 Action/Thunk 範本，供功能性非同步操作參考？
+
+## VI. API Interaction Layer
+
+- [ ] 是否詳細說明 HTTP Client 設定（如 Axios 實例、Fetch 包裝、base URL、預設標頭、攔截器）？
+- [ ] 是否說明服務定義的慣例？
+- [ ] 是否有提供服務範例（如 `userService.ts`），並說明其用途與範例函式？
+- [ ] 是否有說明 API 呼叫的全域錯誤處理（如 toast 通知、全域錯誤狀態）？
+- [ ] 是否有針對元件內部的錯誤處理提供指引？
+- [ ] 是否有說明 API 呼叫的客戶端重試邏輯與設定？
+
+## VII. Routing Strategy
+
+- [ ] 是否明確說明所選路由函式庫？
+- [ ] 是否有提供路由定義表格？
+  - [ ] 是否包含路徑模式、元件／頁面、保護狀態與備註？
+  - [ ] 是否列出所有關鍵應用路由？
+- [ ] 是否有說明路由保護的認證機制？
+- [ ] 若有角色／權限，是否有說明授權保護機制？
+
+## VIII. Build, Bundling, and Deployment
+
+- [ ] 是否列出關鍵建置腳本（如 `npm run build`）並說明其用途？
+- [ ] 是否說明不同環境下建置流程中的環境變數處理？
+- [ ] 是否詳細說明程式碼分割策略（如依路由、依元件）？
+- [ ] 是否確認或說明 Tree Shaking？
+- [ ] 是否有說明 Lazy Loading 策略（元件、圖片、路由）？
+- [ ] 是否有提及建置工具的壓縮與最小化？
+- [ ] 是否明確指定目標部署平台（如 Vercel、Netlify）？
+- [ ] 是否說明部署觸發方式（如 Git push 觸發 CI/CD），並參照主 CI/CD 流程？
+- [ ] 是否有說明靜態資產的快取策略（CDN／瀏覽器）？
+
+## IX. Frontend Testing Strategy
+
+- [ ] 是否有主測試策略文件／章節連結且正確？
+- [ ] 元件測試部分：
+  - [ ] 是否明確定義測試範圍？
+  - [ ] 是否列出測試工具？
+  - [ ] 是否明確說明測試重點（渲染、props、互動）？
+  - [ ] 是否指定測試檔案位置？
+- [ ] UI 整合／流程測試部分：
+  - [ ] 是否明確定義範圍（多元件間互動）？
+  - [ ] 是否列出工具（可與元件測試相同）？
+  - [ ] 是否明確說明測試重點？
+- [ ] 前端 E2E 測試部分：
+  - [ ] 是否重申工具（如 Playwright、Cypress）？
+  - [ ] 是否定義範圍（前端關鍵用戶旅程）？
+  - [ ] 是否有說明 UI E2E 測試的測試資料管理？
+
+## X. Accessibility (AX) Implementation Details
+
+- [ ] 是否強調使用語意化 HTML？
+- [ ] 是否有 ARIA 實作（自訂元件的角色、狀態、屬性）指引？
+- [ ] 是否明確說明鍵盤操作需求（所有互動元件可聚焦／操作）？
+- [ ] 是否有聚焦管理（如 modal、動態內容）說明？
+- [ ] 是否列出 AX 測試工具（如 Axe DevTools、Lighthouse）？
+- [ ] 此區塊是否與 UI/UX 規格的 AX 要求一致？
+
+## XI. Performance Considerations
+
+- [ ] 是否有討論圖片最佳化（格式、響應式圖片、延遲載入）？
+- [ ] 是否重申程式碼分割與延遲載入（對效能感知的影響）？
+- [ ] 是否有提及最小化重渲染技巧（如 `React.memo`）？
+- [ ] 是否有考慮事件處理的 Debounce／Throttle？
+- [ ] 若適用，是否有提及長列表／大量資料的虛擬化？
+- [ ] 若相關，是否有討論客戶端快取策略（瀏覽器快取、service worker）？
+- [ ] 是否列出效能監控工具（如 Lighthouse、DevTools）？
+
+## XII. Change Log
+
+- [ ] 是否有變更紀錄表並初始化？
+- [ ] 是否有文件演進過程的更新機制？
+
+---
+
+## Final Review Sign-off
+
+- [ ] 是否所有佔位符（如 `{Project Name}`、`{e.g., ...}`）皆已填寫或移除？
+- [ ] 設計架構師是否已檢查文件之清晰度、一致性與完整性？
+- [ ] 所有連結文件（主架構、UI/UX 規格）是否已定稿或穩定可依賴？
+- [ ] 文件是否已準備好交付開發團隊？
