@@ -1,0 +1,376 @@
+# BMad DiCaster 架構文件
+
+## 簡介 / 前言
+
+本文件概述 BMad DiCaster 的整體專案架構，包括後端系統、共享服務以及非 UI 特定考量。其主要目標是作為 AI 驅動開發的指導性架構藍圖，確保一致性並遵循所選的模式與技術。
+
+**與前端架構的關係：**
+本專案包含一個重要的使用者介面。一份獨立的前端架構文件（預計命名為 `frontend-architecture.md` 並在建立後連結至「關鍵參考文件」）將詳述前端特定的設計，且必須與本文件一同使用。本文件中記載的核心技術堆疊選擇（請參閱「最終技術堆疊選型」）對整個專案（包括任何前端元件）均具決定性。
+
+## 目錄
+
+1.  [簡介 / 前言](https://www.google.com/search?q=%23introduction--preamble)
+2.  [目錄](https://www.google.com/search?q=%23table-of-contents)
+3.  [技術摘要](https://www.google.com/search?q=%23technical-summary)
+4.  [高階概觀](https://www.google.com/search?q=%23high-level-overview)
+5.  [元件視圖](https://www.google.com/search?q=%23component-view)
+    - [採用的架構 / 設計模式](https://www.google.com/search?q=%23architectural--design-patterns-adopted)
+6.  [工作流程編排與狀態管理](https://www.google.com/search?q=%23workflow-orchestration-and-status-management)
+7.  [專案結構](https://www.google.com/search?q=%23project-structure)
+    - [關鍵目錄說明](https://www.google.com/search?q=%23key-directory-descriptions)
+    - [Monorepo 管理](https://www.google.com/search?q=%23monorepo-management)
+    - [注意事項](https://www.google.com/search?q=%23notes)
+8.  [API 參考](https://www.google.com/search?q=%23api-reference)
+    - [使用的外部 API](https://www.google.com/search?q=%23external-apis-consumed)
+    - [提供的內部 API (由 BMad DiCaster 提供)](https://www.google.com/search?q=%23internal-apis-provided-by-bmad-dicaster)
+9.  [資料模型](https://www.google.com/search?q=%23data-models)
+    - [核心應用程式實體 / 領域物件](https://www.google.com/search?q=%23core-application-entities--domain-objects)
+    - [資料庫結構 (Supabase PostgreSQL)](https://www.google.com/search?q=%23database-schemas-supabase-postgresql)
+10. [核心工作流程 / 序列圖](https://www.google.com/search?q=%23core-workflow--sequence-diagrams)
+    - [1. 每日工作流程啟動與 HN 內容擷取](https://www.google.com/search?q=%231-daily-workflow-initiation--hn-content-acquisition)
+    - [2. 文章抓取與摘要流程](https://www.google.com/search?q=%232-article-scraping--summarization-flow)
+    - [3. 電子報、Podcast 與傳送流程](https://www.google.com/search?q=%233-newsletter-podcast-and-delivery-flow)
+11. [最終技術堆疊選型](https://www.google.com/search?q=%23definitive-tech-stack-selections)
+12. [基礎架構與部署概觀](https://www.google.com/search?q=%23infrastructure-and-deployment-overview)
+13. [錯誤處理策略](https://www.google.com/search?q=%23error-handling-strategy)
+14. [編碼標準](https://www.google.com/search?q=%23coding-standards)
+    - [詳細的語言與框架慣例](https://www.google.com/search?q=%23detailed-language--framework-conventions)
+15. [整體測試策略](https://www.google.com/search?q=%23overall-testing-strategy)
+16. [安全性最佳實務](https://www.google.com/search?q=%23security-best-practices)
+17. [關鍵參考文件](https://www.google.com/search?q=%23key-reference-documents)
+18. [變更日誌](https://www.google.com/search?q=%23change-log)
+19. [給設計架構師的提示：前端架構定義](https://www.google.com/search?q=%23prompt-for-design-architect-frontend-architecture-definition)
+
+## 技術摘要
+
+BMad DiCaster 是一個 Web 應用程式，旨在提供每日精簡的 Hacker News (HN) 熱門文章摘要，以 HTML 電子報和可選的 AI 生成 Podcast 形式傳送，並可透過 Next.js Web 介面存取。該系統採用部署於 Vercel 的無伺服器、事件驅動架構，並由 Supabase 提供 PostgreSQL 資料庫服務與函式託管。關鍵元件包括 HN 內容擷取服務、文章抓取服務（使用 Cheerio）、AI 驅動的摘要服務（透過可設定的 LLM Facade 連接 Ollama/遠端 API）、Podcast 生成服務 (Play.ht)、電子報生成服務 (Nodemailer) 以及工作流程編排。此架構強調模組化、明確的關注點分離（針對複雜函式採用務實的六角形架構）以及健全的錯誤處理，目標是實現高效開發，特別是由 AI 開發者代理人進行開發。
+
+## 高階概觀
+
+BMad DiCaster 應用程式將採用完全託管於 Vercel 的**無伺服器、事件驅動架構**，並由 Supabase 提供後端服務（資料庫與函式）。專案將以 **monorepo** 的形式組織，包含 Next.js 前端應用程式與後端 Supabase 函式。
+
+核心資料處理流程設計為事件驅動的 pipeline：
+
+1.  排程機制 (Vercel Cron Job) 或手動觸發 (API/CLI) 啟動每日工作流程，建立一個 `workflow_run` job。
+2.  Hacker News 文章與留言透過 HN Algolia API 擷取並儲存於 Supabase。
+3.  此資料插入會透過資料庫 webhook 觸發 Supabase 函式，以抓取連結的文章。
+4.  成功的文章抓取與儲存會觸發進一步的 Supabase 函式，以進行文章與留言的 AI 摘要。
+5.  追蹤 workflow run 的摘要步驟完成情況，一旦所有先決條件滿足，便會觸發電子報生成服務。
+6.  電子報內容傳送至 Play.ht API 以生成 Podcast。
+7.  Play.ht 呼叫 webhook 通知我們的系統 Podcast 已就緒，並提供 Podcast URL。
+8.  Supabase 中的電子報資料會更新 Podcast URL。
+9.  接著，電子報會透過 Nodemailer 傳送給訂閱者，並考量 Podcast 的可用性（包含延遲/重試邏輯）。
+10. Next.js 前端允許使用者檢視目前與過去的電子報，並收聽 Podcast。
+
+這種事件驅動的方法，使用 Supabase Database Webhooks（透過 `pg_net` 或原生功能）觸發 Vercel 託管的 Supabase Functions，旨在建立一個具彈性且可擴展的系統。它透過將長時間執行的程序分解為較小的、非同步觸發的單元，來降低潛在的逾時問題。
+
+以下是說明主要服務與使用者互動的系統情境圖：
+
+```mermaid
+graph TD
+    actor Caller as 手動/API/CLI/Cron
+    participant TriggerAPI as POST /api/system/trigger-workflow
+    participant WorkflowRunsDB as workflow_runs (資料庫資料表)
+    participant WorkflowTracker as WorkflowTrackerService
+    participant HNContentService as HNContentService (Supabase Fn)
+    participant HNAlgoliaAPI as HN Algolia API
+    participant HNPostsDB as hn_posts (資料庫資料表)
+    participant HNCommentsDB as hn_comments (資料庫資料表)
+    participant EventTrigger1 as 資料庫事件/Webhook (於 hn_posts 插入時)
+
+    Caller->>+TriggerAPI: 要求啟動每日工作流程
+    TriggerAPI->>+WorkflowTracker: initiateNewWorkflow()
+    WorkflowTracker->>+WorkflowRunsDB: 插入新的 run (status='pending', details={})
+    WorkflowRunsDB-->>-WorkflowTracker: new_workflow_run_id
+    WorkflowTracker-->>TriggerAPI: { jobId: new_workflow_run_id }
+    TriggerAPI-->>-Caller: HTTP 202 Accepted { jobId }
+
+    alt HN 內容擷取的初始觸發
+        WorkflowTracker->>+HNContentService: triggerFetch(workflow_run_id)
+    else 替代方案：來自 WorkflowRunsDB 插入的事件
+        WorkflowRunsDB-->>EventTrigger1: 新的 workflow_run 記錄
+        EventTrigger1->>+HNContentService: Invoke(workflow_run_id, event_payload)
+    end
+
+    HNContentService->>+WorkflowTracker: updateWorkflowStep(workflow_run_id, 'fetching_hn_posts', 'fetching_hn')
+    WorkflowTracker->>+WorkflowRunsDB: 更新 workflow_runs (status, current_step_details)
+
+    HNContentService->>+HNAlgoliaAPI: GET /search?tags=front_page
+    HNAlgoliaAPI-->>-HNContentService: 首頁 story 項目
+
+    loop 針對每個 story 項目 (依分數排序後最多 30 個)
+        HNContentService->>+HNPostsDB: 插入 story (hn_post_id, ..., workflow_run_id)
+        HNPostsDB-->>EventTrigger1: 通知：已插入新的 hn_post
+        EventTrigger1-->>ArticleScrapingService: (非同步) 觸發 ArticleScrapingService(hn_post_id, workflow_run_id)
+
+        HNContentService->>+HNAlgoliaAPI: GET /items/{story_objectID} (擷取留言)
+        HNAlgoliaAPI-->>-HNContentService: 包含留言的 Story 詳細資訊
+        loop 針對每則留言
+            HNContentService->>+HNCommentsDB: 插入留言
+        end
+    end
+    HNContentService->>+WorkflowTracker: updateWorkflowDetails(workflow_run_id, {posts_fetched: X, comments_fetched: Y})
+    WorkflowTracker->>WorkflowRunsDB: 更新 workflow_runs (details)
+```
+
+### 2\. 文章抓取與摘要流程
+
+```mermaid
+sequenceDiagram
+    participant EventTrigger1 as 資料庫事件/Webhook (於 hn_posts 插入時)
+    participant ArticleScrapingService as ArticleScrapingService (Supabase Fn)
+    participant ScrapedArticlesDB as scraped_articles (資料庫資料表)
+    participant WorkflowTracker as WorkflowTrackerService
+    participant WorkflowRunsDB as workflow_runs (資料庫資料表)
+    participant EventTrigger2 as 資料庫事件/Webhook (於 scraped_articles 插入/更新時)
+    participant SummarizationService as SummarizationService (Supabase Fn)
+    participant LLMFacade as LLMFacade (共享函式)
+    participant LLMProvider as LLM 供應商 (Ollama/遠端)
+    participant SummariesDB as article_summaries / comment_summaries (資料庫資料表)
+    participant PromptsDB as summarization_prompts (資料庫資料表)
+
+    EventTrigger1->>+ArticleScrapingService: Invoke(hn_post_id, workflow_run_id, article_url)
+    ArticleScrapingService->>+WorkflowTracker: updateWorkflowStep(workflow_run_id, 'scraping_article_for_post_' + hn_post_id, 'scraping_articles')
+
+    ArticleScrapingService->>+ScrapedArticlesDB: 插入新文章 (status='pending', workflow_run_id)
+
+    opt 文章 URL 有效
+        ArticleScrapingService->>ArticleScrapingService: 使用 Cheerio 擷取並解析 HTML
+        ArticleScrapingService->>+ScrapedArticlesDB: 更新 scraped_articles 設定 content, status='success'
+    else 抓取失敗
+        ArticleScrapingService->>+ScrapedArticlesDB: 更新 scraped_articles 設定 status='failed_...'
+    end
+    ScrapedArticlesDB-->>EventTrigger2: 通知：新增/更新 scraped_article (status='success')
+    EventTrigger2-->>SummarizationService: (非同步) 觸發 SummarizationService(scraped_article_id, workflow_run_id, 'article')
+
+    ArticleScrapingService->>+WorkflowTracker: updateWorkflowDetails(workflow_run_id, {articles_attempted_increment: 1, ...})
+
+    SummarizationService->>+WorkflowTracker: updateWorkflowStep(workflow_run_id, 'summarizing_content_for_post_' + hn_post_id, 'summarizing_content')
+
+    alt 摘要文章
+        SummarizationService->>SummarizationService: 取得 article_text
+        SummarizationService->>+PromptsDB: 取得 article_prompt
+        SummarizationService->>+LLMFacade: generateSummary(article_text, article_prompt)
+        LLMFacade->>+LLMProvider: 要求摘要
+        LLMProvider-->>-LLMFacade: article_summary
+        SummarizationService->>+SummariesDB: 插入至 article_summaries
+    end
+
+    alt 摘要留言 (針對 hn_post_id)
+        SummarizationService->>SummarizationService: 取得 comment_texts
+        SummarizationService->>+PromptsDB: 取得 comment_prompt
+        SummarizationService->>+LLMFacade: generateSummary(comment_texts, comment_prompt)
+        LLMFacade->>+LLMProvider: 要求摘要
+        LLMProvider-->>-LLMFacade: comment_summary
+        SummarizationService->>+SummariesDB: 插入至 comment_summaries
+    end
+    SummarizationService->>+WorkflowTracker: updateWorkflowDetails(workflow_run_id, {summaries_generated_increment: N})
+```
+
+### 3\. 電子報、Podcast 與傳送流程
+
+```mermaid
+sequenceDiagram
+    participant CheckWorkflowService as CheckWorkflowCompletionService (Supabase Cron Fn)
+    participant WorkflowRunsDB as workflow_runs (資料庫資料表)
+    participant WorkflowTracker as WorkflowTrackerService
+    participant NewsletterGenService as NewsletterGenerationService (Supabase Fn)
+    participant PodcastGenService as PodcastGenerationService (Supabase Fn)
+    participant PlayHTAPI as Play.ht API
+    participant NewsletterTemplatesDB as newsletter_templates (資料庫資料表)
+    participant SummariesDB as article_summaries / comment_summaries (資料庫資料表)
+    participant NewslettersDB as newsletters (資料庫資料表)
+    participant PlayHTWebhook as POST /api/webhooks/playht (Next.js API Route)
+    participant NodemailerService as NodemailerFacade (共享函式)
+    participant SubscribersDB as subscribers (資料庫資料表)
+    participant ExternalEmailService as 電子郵件服務 (例如 Gmail SMTP)
+
+    CheckWorkflowService->>+WorkflowRunsDB: 查詢 runs (status='summarizing_content', 所有摘要是否完成？)
+    WorkflowRunsDB-->>-CheckWorkflowService: workflow_run_id (準備產生電子報)
+
+    CheckWorkflowService->>+WorkflowTracker: updateWorkflowStep(workflow_run_id, 'starting_newsletter_generation', 'generating_newsletter')
+    CheckWorkflowService->>+NewsletterGenService: Invoke(workflow_run_id)
+
+    NewsletterGenService->>+NewsletterTemplatesDB: 取得 default_template
+    NewsletterGenService->>+SummariesDB: 取得 workflow_run_id 的摘要
+    NewsletterGenService->>NewsletterGenService: 編譯 HTML 電子報
+    NewsletterGenService->>+NewslettersDB: 插入電子報 (html_content, podcast_status='pending')
+
+    NewsletterGenService->>+PodcastGenService: initiatePodcast(newsletter_id, html_content)
+    PodcastGenService->>+PlayHTAPI: POST /playnotes (webHookUrl=...)
+    PlayHTAPI-->>-PodcastGenService: { playht_job_id, status: 'generating' }
+    PodcastGenService->>+NewslettersDB: 更新 newsletters 設定 podcast_playht_job_id, podcast_status='generating'
+    PodcastGenService->>+WorkflowTracker: updateWorkflowStep(workflow_run_id, 'podcast_generation_initiated', 'generating_podcast')
+
+    PlayHTAPI-->>+PlayHTWebhook: POST (status='completed', audioUrl='...')
+    PlayHTWebhook->>+NewslettersDB: 更新 newsletters 設定 podcast_url, podcast_status='completed'
+    PlayHTWebhook->>+WorkflowTracker: updateWorkflowDetails(workflow_run_id, {podcast_status: 'completed'})
+    PlayHTWebhook-->>-PlayHTAPI: HTTP 200 OK
+
+    CheckWorkflowService->>+WorkflowRunsDB: 查詢 runs (status='generating_podcast', podcast_status IN ('completed', 'failed') 或逾時)
+    WorkflowRunsDB-->>-CheckWorkflowService: workflow_run_id (準備傳送)
+
+    CheckWorkflowService->>+WorkflowTracker: updateWorkflowStep(workflow_run_id, 'starting_newsletter_delivery', 'delivering_newsletter')
+    CheckWorkflowService->>+NewsletterGenService: triggerDelivery(newsletter_id)
+
+    NewsletterGenService->>+NewslettersDB: 取得 newsletter_data (html, podcast_url)
+    NewsletterGenService->>NewsletterGenService: (若 podcast_url 可用則嵌入 HTML)
+    NewsletterGenService->>+SubscribersDB: 取得 active_subscribers
+    loop 針對每位訂閱者
+        NewsletterGenService->>+NodemailerService: sendEmail(to, subject, html)
+        NodemailerService->>+ExternalEmailService: SMTP 傳送
+    end
+    NewsletterGenService->>+NewslettersDB: 更新 newsletters 設定 delivery_status='sent', sent_at=now()
+    NewsletterGenService->>+WorkflowTracker: completeWorkflow(workflow_run_id, {delivery_status: 'sent'})
+```
+
+## 最終技術堆疊選型
+
+本節概述 BMad DiCaster 專案的最終技術選型。
+
+- **首選入門範本 前端與後端：** Vercel/Supabase Next.js App Router Template ([https://vercel.com/templates/next.js/supabase](https://vercel.com/templates/next.js/supabase))
+
+| 類別             | 技術                  | 版本 / 詳細資訊           | 說明 / 用途                                                     | 理由 (可選，來自 PRD/使用者)                      |
+| :------------------- | :-------------------------- | :-------------------------- | :------------------------------------------------------------------------ | :----------------------------------------------------------- |
+| **語言**        | TypeScript                  | `5.7.2`                     | 後端/前端主要語言                                     | 強型別、社群支援、與 Next.js/React 一致  |
+| **執行環境**          | Node.js                     | `22.10.2`                   | Next.js 與 Supabase Functions 的伺服器端執行環境        | 與 Next.js、Vercel 環境相容                  |
+| **框架**       | Next.js                     | `latest` (例如 14.x.x)     | 全端 React 框架                                                | App Router、SSR、API 路由、Vercel 協同作用                  |
+|                      | React                       | `19.0.0`                    | 前端 UI 函式庫                                                       | 元件化、宣告式                                 |
+| **UI 函式庫**     | Tailwind CSS                | `3.4.17`                    | Utility-first CSS 框架                                               | 快速 UI 開發、一致的樣式                     |
+|                      | Shadcn UI                   | `latest`                    | React 元件函式庫 (透過 CLI)                                         | 預設樣式、無障礙元件、基於 Radix 與 Tailwind 建構 |
+| **資料庫**        | PostgreSQL                  | (透過 Supabase)              | 主要關聯式資料儲存                                             | 由 Supabase 提供、健全、可擴展                       |
+| **雲端平台**   | Vercel                      | N/A                         | Next.js 應用程式與 Supabase Functions 的託管平台                     | 無縫 Next.js/Supabase 部署、Edge Network           |
+| **雲端服務**   | Supabase Functions          | N/A (透過 Vercel 部署)     | 後端 pipeline 與 API 的無伺服器運算                            | 與 Supabase DB 整合、事件驅動能力       |
+|                      | Supabase Auth               | N/A                         | 使用者驗證與管理                                        | 與 Supabase 整合、RLS                                |
+|                      | Supabase Storage            | N/A                         | 檔案儲存 (例如，若 Play.ht 需要，可儲存暫時的電子報檔案) | 與 Supabase 整合                                     |
+| **基礎架構**   | Supabase CLI                | `latest`                    | 本機開發、遷移、函式部署                        | Supabase 開發的官方工具                       |
+|                      | Docker                      | `latest` (透過 Supabase CLI) | 本機 Supabase 服務的容器化                              | 本機開發一致性                                |
+| **狀態管理** | Zustand                     | `latest`                    | 前端狀態管理                                                 | 簡單、無主見、React 高效能                  |
+| **測試**          | React Testing Library (RTL) | `latest`                    | 測試 React 元件                                                  | 以使用者為中心的測試、與 Jest 良好搭配                   |
+|                      | Jest                        | `latest`                    | JS/TS 的單元/整合測試框架                              | 廣泛使用、對 Next.js/React 支援良好                  |
+|                      | Playwright                  | `latest`                    | 端對端測試框架                                              | 現代化、可靠、跨瀏覽器                              |
+| **CI/CD**            | GitHub Actions              | N/A                         | 持續整合/持續部署                                         | 與 GitHub 整合、建置/部署/測試自動化     |
+| **其他工具**      | Cheerio                     | `latest`                    | 文章的 HTML 解析/抓取                                        | 伺服器端 HTML 操作                                |
+|                      | Nodemailer                  | `latest`                    | 電子報的郵件傳送函式庫                                     | 從 Node.js 進行健全的郵件傳送                            |
+|                      | Zod                         | `latest`                    | TypeScript 優先的結構定義與驗證                        | API 輸入、環境變數等的資料驗證   |
+|                      | `tsx` / `ts-node`           | `latest` (用於腳本)      | Node.js 腳本的 TypeScript 執行 (例如 `scripts/`)                | 直接執行 TS 腳本                                  |
+|                      | Prettier                    | `3.3.3`                     | 程式碼格式化工具                                                            | 一致的程式碼風格                                        |
+|                      | ESLint                      | `latest`                    | TypeScript/JavaScript 的 Linter                                          | 程式碼品質與錯誤預防                            |
+|                      | Pino                        | `latest`                    | Node.js 的高效能 JSON Logger                                  | 結構化且高效的日誌記錄                             |
+
+## 基礎架構與部署概觀
+
+- **雲端供應商：** Vercel (用於託管 Next.js 應用程式與 Supabase Functions) 和 Supabase (受控管的 PostgreSQL、Auth、Storage；執行於 AWS 等底層雲端)。
+- **使用的核心服務：** Vercel (Next.js Hosting、Serverless/Edge Functions、CDN、CI/CD、Cron Jobs)、Supabase (PostgreSQL、Auth、Storage、Functions、Database Webhooks)。
+- **基礎架構即程式碼 (IaC)：** 用於資料庫結構的 Supabase Migrations (`supabase/migrations/`)；Vercel 專案設定 (`vercel.json` 若需要)。
+- **部署策略：** 用於 CI/CD 的 GitHub Actions。前端 (Next.js) 透過 Vercel Git 整合。後端 (Supabase Functions) 透過 GitHub Actions 內的 Supabase CLI。資料庫遷移透過 Supabase CLI。
+- **環境：** 本機 (Next.js 開發伺服器、Supabase CLI 本機堆疊)、開發/預覽 (連結至開發 Supabase 實例的 Vercel 預覽部署)、生產 (連結至生產 Supabase 實例的 Vercel 生產部署)。
+- **環境提升：** 本機 -> 開發/預覽 (PR) -> 生產 (合併至 main)。
+- **復原策略：** 用於應用程式/函式復原的 Vercel 儀表板/CLI；用於資料庫的 Supabase 遷移或時間點復原。
+
+## 錯誤處理策略
+
+- **一般方法：** 使用標準 `Error` 物件或自訂擴充。Supabase Functions 捕捉錯誤、透過 Pino 記錄、更新 `workflow_runs`，並避免未處理的 rejection。Next.js API 路由傳回適當的 HTTP 錯誤回應與 JSON payload。
+- **日誌記錄 (Pino)：**
+  - 函式庫：Pino (`pino`) 用於 Supabase Functions 與 Next.js API 路由中的結構化 JSON 日誌記錄。
+  - 設定：共享的 Pino Logger 實例 (`supabase/functions/_shared/logger.ts`)。
+  - 格式：JSON。
+  - 層級：`trace`、`debug`、`info`、`warn`、`error`、`fatal`。
+  - 情境：日誌包含 `timestamp`、`severity`、`workflowRunId`、`service`/`functionName`、`message` 以及相關的 `details`。**不記錄敏感資料。**
+- **特定處理模式：**
+  - **外部 API 呼叫：** 透過 Facade 進行，包含逾時與有限重試 (指數退避) 以處理暫時性錯誤。Facade 拋出標準化的自訂錯誤。
+  - **內部錯誤/業務邏輯：** 在函式內捕捉；記錄詳細資訊，將 `workflow_runs` 更新為 'failed'。API 路由向用戶端傳回一般錯誤。
+  - **資料庫操作：** 嚴重錯誤導致 'failed' workflow status。
+  - **抓取/摘要失敗：** 個別項目失敗會被記錄並更新狀態 (例如 `scraped_articles.scraping_status`)，但若其他項目成功，則可能不會中止整個 workflow run。
+  - **Podcast/傳送失敗：** 記錄下來，並在 `newsletters` 與 `workflow_runs` 中更新狀態。逾時/失敗後，電子報可能會在沒有 Podcast 的情況下傳送。
+  - **`CheckWorkflowCompletionService`：** 設計為具備彈性；處理一個 run 時發生錯誤不應妨礙處理其他 run 或未來的排程 run。
+
+## 編碼標準
+
+(如先前詳述，包括 TypeScript、Node.js、ESLint、Prettier、命名慣例、共置的單元測試 `*.test.ts(x)`/`*.spec.ts(x)`、async/await、嚴格型別安全、Pino 日誌記錄，以及特定的框架/反模式指南。)
+
+## 整體測試策略
+
+(如先前詳述，涵蓋使用 Jest/RTL 的單元測試、整合測試、使用 Playwright 的 E2E 測試、80% 單元測試覆蓋率目標、針對 Facade 與外部相依性的特定模擬策略，以及測試資料管理。)
+
+## 安全性最佳實務
+
+(如先前詳述，包括使用 Zod 進行輸入驗證、輸出編碼、透過環境變數管理密鑰、相依性安全掃描、系統 API 的 API 金鑰驗證、Play.ht webhook 驗證、Supabase RLS、最小權限原則、HTTPS，以及安全的錯誤資訊揭露。)
+
+## 關鍵參考文件
+
+1.  **產品需求文件 (PRD):** [`docs/prd-incremental-full-agile-mode.txt`](docs/prd-incremental-full-agile-mode.txt:1)
+2.  **UI/UX 規格書:** [`docs/ui-ux-spec.txt`](docs/ui-ux-spec.txt:1)
+3.  **技術偏好:** [`docs/technical-preferences copy.txt`](docs/technical-preferences%20copy.txt:1)
+4.  **環境變數文件:** [`docs/environment-vars.md`](docs/environment-vars.md:1) (待建立)
+5.  **(選用) 前端架構文件:** [`docs/frontend-architecture.md`](docs/frontend-architecture.md:1) (由設計架構師建立)
+6.  **Play.ht API 文件:** [https://docs.play.ai/api-reference/playnote/post](https://docs.play.ai/api-reference/playnote/post)
+7.  **Hacker News Algolia API:** [https://hn.algolia.com/api](https://hn.algolia.com/api)
+8.  **Ollama API 文件:** [https://github.com/ollama/ollama/blob/main/docs/api.md](https://www.google.com/search?q=https://github.com/ollama/ollama/blob/main/docs/api.md)
+9.  **Supabase 文件:** [https://supabase.com/docs](https://supabase.com/docs)
+10. **Next.js 文件:** [https://nextjs.org/docs](https://nextjs.org/docs)
+11. **Vercel 文件:** [https://vercel.com/docs](https://vercel.com/docs)
+12. **Pino 日誌記錄文件:** [https://getpino.io/](https://getpino.io/)
+
+## 變更日誌
+
+| 變更                                     | 日期       | 版本 | 說明                                                                                                                                                                                | 作者         |
+| :----------------------------------------- | :--------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------- |
+| 基於 PRD 與討論的初始草稿 | 2025-05-13 | 0.1     | 首份完整草稿，涵蓋專案概觀、元件、資料模型、技術堆疊、部署、錯誤處理、編碼標準、測試策略、安全性以及工作流程編排。 | 3-arch (代理人) |
+
+---
+
+## 給設計架構師的提示：前端架構定義
+
+**致設計架構師 (專精於前端架構的代理人)：**
+
+您現在的任務是為 BMad DiCaster 專案定義詳細的**前端架構**。本主要架構文件與 [`docs/ui-ux-spec.txt`](docs/ui-ux-spec.txt:1) 是您的主要輸入成果。您的目標是產出一份專用的 `frontend-architecture.md` 文件。
+
+**關鍵輸入與限制 (來自本主要架構文件與 UI/UX 規格書)：**
+
+1.  **整體專案架構：** 請熟悉「高階概觀」、「元件視圖」、「資料模型」(特別是 `shared/types/` 中的任何共享型別) 以及「API 參考」(特別是內部 API，例如 `/api/system/trigger-workflow` 與 `/api/webhooks/playht`，前端未來可能間接知道或需要與其互動以進行管理，儘管 MVP 前端主要讀取電子報資料)。
+2.  **UI/UX 規格書 ([`docs/ui-ux-spec.txt`](docs/ui-ux-spec.txt:1))：** 本文件包含使用者流程、線框圖、核心畫面 (電子報列表、電子報詳細內容)、元件清單 (NewsletterCard、PodcastPlayer、DownloadButton、BackButton)、品牌考量 (synthwave、極簡風格) 以及無障礙性期望。
+3.  **最終技術堆疊 (前端相關)：**
+    - 框架：Next.js (`latest`，App Router)
+    - 語言：React (`19.0.0`) 搭配 TypeScript (`5.7.2`)
+    - UI 函式庫：Tailwind CSS (`3.4.17`)、Shadcn UI (`latest`)
+    - 狀態管理：Zustand (`latest`)
+    - 測試：React Testing Library (RTL) (`latest`)、Jest (`latest`)
+    - 入門範本：Vercel/Supabase Next.js App Router template ([https://vercel.com/templates/next.js/supabase](https://vercel.com/templates/next.js/supabase))。利用其現有結構，用於 `app/`、`components/ui/` (來自 Shadcn)、`lib/utils.ts` 以及 `utils/supabase/` (用於 Supabase 的用戶端、伺服器端、中介軟體輔助函式)。
+4.  **專案結構 (前端相關)：** 請參閱本文件中的「專案結構」一節，特別是 `app/` 目錄、`components/` (用於 Shadcn `ui` 與您的 `core` 應用程式元件)、`lib/` 以及 `utils/supabase/`。
+5.  **現有前端檔案 (來自範本)：** 請注意 [`middleware.ts`](middleware.ts:1) (用於 Supabase auth) 以及入門範本提供的任何現有元件或公用程式函式。
+
+**前端架構文件 ([`frontend-architecture.md`](frontend-architecture.md:1)) 的任務：**
+
+1.  **完善前端專案結構：**
+    - 詳細說明 `app/` 內的特定資料夾結構。建議頁面 (路由)、版面配置、應用程式特定元件 (`app/components/core/`)、資料擷取邏輯、context provider 以及 Zustand store 的組織方式。
+    - Shadcn UI 元件 (`components/ui/`) 將如何使用並可能進行客製化？
+2.  **元件架構：**
+    - 針對 UI/UX 規格書中識別的每個核心畫面 (電子報列表、電子報詳細內容)，定義主要的 React 元件階層。
+    - 指定主要可重複使用應用程式元件 (例如 `NewsletterCard`、`NewsletterDetailView`、`PodcastPlayerControls`) 的職責與關鍵 props。
+    - 元件將如何從 Supabase 擷取並顯示資料？ (例如，Server Components、使用來自 [`utils/supabase/client.ts`](utils/supabase/client.ts:1) 或 [`utils/supabase/server.ts`](utils/supabase/server.ts:1) 的 Supabase client 的 Client Components)。
+3.  **狀態管理 (Zustand)：**
+    - 識別全域與區域狀態需求。
+    - 定義特定的 Zustand store：它們將儲存哪些資料 (例如，目前的電子報列表、選定的電子報詳細內容、Podcast 播放器狀態)，以及它們將公開哪些動作。
+    - 元件將如何與這些 store 互動？
+4.  **資料擷取與快取 (前端)：**
+    - 指定擷取電子報資料 (列表與個別項目) 與 Podcast 資訊的模式。
+    - Next.js 資料擷取功能 (Server Components、Route Handlers、包含快取選項的 `Workspace`) 將如何與 Supabase client 搭配使用？
+    - 處理 UI 中資料擷取的載入與錯誤狀態。
+5.  **路由：**
+    - 確認 Next.js App Router 的使用，並定義電子報列表與詳細內容頁面的 URL 結構。
+6.  **樣式方法：**
+    - 重申使用 Tailwind CSS 與 Shadcn UI。
+    - 定義任何專案特定的慣例，以套用 Tailwind 類別或擴充主題 (超出 [`tailwind.config.ts`](tailwind.config.ts:1) 中的內容)。
+    - 如何使用 Tailwind 實作「synthwave technical glowing purple vibes」？
+7.  **錯誤處理 (前端)：**
+    - API 呼叫 (至 Supabase 或內部 Next.js API 路由，若有) 的錯誤將如何處理並向使用者顯示？
+    - UI 錯誤邊界的策略。
+8.  **無障礙性 (AX)：**
+    - 詳細說明如何在元件設計與實作中滿足 WCAG 2.1 Level A 要求 (鍵盤導覽、語意化 HTML、替代文字、色彩對比)，並利用 Next.js 與 Shadcn UI 的功能。
+9.  **測試 (前端)：**
+    - 重申使用 Jest 與 RTL 進行 React 元件的單元/整合測試。
+    - 提供撰寫有效前端測試的範例或指南。
+10. **關鍵前端函式庫與版本控制：** 確認主要技術堆疊中的版本，並列出任何額外需要的前端專用函式庫。
+
+您的輸出應為一份清晰、格式良好的 `frontend-architecture.md` 文件，可供 AI 開發者代理人用於前端實作。請遵守輸出格式指南。您現在正以**前端架構模式**運作。

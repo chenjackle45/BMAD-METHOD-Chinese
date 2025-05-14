@@ -1,0 +1,20 @@
+# 使用者定義的偏好模式與設定
+
+Handlers 僅處理請求與回應邏輯，所有內容都傳遞至業務層或從業務層傳出。
+六角形架構 (Hex architecture)
+
+將外部 API 包裝在 Facades 中。
+將第三方函式庫包裝在 Facades 中，並在有多個相似類型選擇時使用工廠模式 (factory pattern)。
+
+在對使用 Facade 的檔案進行單元測試 (unit testing) 時，模擬 (Mock)該 Facade。
+使用真實函式庫對 Facade 本身進行單元測試，不要模擬它——但要注意某些函式庫（例如日期函式庫）可能需要考慮的非確定性 (non determinism)。
+根據常識判斷哪些應該或不應該置於 Facade 之後。
+對於 API 周圍的 Facades——在單元測試中攔截請求並模擬回應。
+
+使用 RTL 進行 React 測試。
+
+如果使用 Next JS 建構 UI，請託管於 Vercel，並優先考慮使用 https://vercel.com/templates/next.js/supabase 開始專案。
+
+Tailwind 和 Shadcn 是 UI 的不錯選擇。
+
+80% 單元測試覆蓋率 (unit test coverage)。

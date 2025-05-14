@@ -2,344 +2,428 @@
 
 ## 目錄
 
-{ 若有新增或移除章節，請於此處更新 }
+{ 若有新增或移除章節，請於此更新 }
 
-- [簡介](#introduction)
-- [整體前端理念與模式](#overall-frontend-philosophy--patterns)
-- [前端目錄結構詳解](#detailed-frontend-directory-structure)
-- [元件拆解與實作細節](#component-breakdown--implementation-details)
-  - [元件命名與組織](#component-naming--organization)
-  - [元件規格模板](#template-for-component-specification)
-- [狀態管理深入探討](#state-management-in-depth)
-  - [Store 結構 / Slices](#store-structure--slices)
-  - [主要 Selector](#key-selectors)
-  - [主要 Action / Reducer / Thunk](#key-actions--reducers--thunks)
-- [API 互動層](#api-interaction-layer)
-  - [Client/Service 結構](#clientservice-structure)
-  - [錯誤處理與重試（前端）](#error-handling--retries-frontend)
-- [路由策略](#routing-strategy)
-  - [路由定義](#route-definitions)
-  - [路由守衛 / 保護](#route-guards--protection)
-- [建置、打包與部署](#build-bundling-and-deployment)
-  - [建置流程與腳本](#build-process--scripts)
-  - [主要打包優化](#key-bundling-optimizations)
-  - [部署至 CDN/Hosting](#deployment-to-cdnhosting)
-- [前端測試策略](#frontend-testing-strategy)
-  - [元件測試](#component-testing)
-  - [UI 整合/流程測試](#ui-integrationflow-testing)
-  - [端對端 UI 測試工具與範圍](#end-to-end-ui-testing-tools--scope)
-- [無障礙（AX）實作細節](#accessibility-ax-implementation-details)
-- [效能考量](#performance-considerations)
-- [變更紀錄](#change-log)
+- [簡介](#簡介)
+- [整體前端理念與模式](#整體前端理念與模式)
+- [前端目錄結構詳解](#前端目錄結構詳解)
+- [元件拆解與實作細節](#元件拆解與實作細節)
+  - [元件命名與組織](#元件命名與組織)
+  - [元件規格範本](#元件規格範本)
+- [狀態管理深入說明](#狀態管理深入說明)
+  - [Store 結構 / Slices](#store-結構--slices)
+  - [主要 Selector](#主要-selector)
+  - [主要 Action / Reducer / Thunk](#主要-action--reducer--thunk)
+- [API 互動層](#api-互動層)
+  - [Client/Service 結構](#clientservice-結構)
+  - [錯誤處理與重試（前端）](#錯誤處理與重試前端)
+- [路由策略](#路由策略)
+  - [路由定義](#路由定義)
+  - [路由守衛 / 保護機制](#路由守衛--保護機制)
+- [建置、打包與部署](#建置打包與部署)
+  - [建置流程與腳本](#建置流程與腳本)
+  - [主要打包優化](#主要打包優化)
+  - [部署至 CDN/主機](#部署至-cdnhosting)
+- [前端測試策略](#前端測試策略)
+  - [元件測試](#元件測試)
+  - [UI 整合/流程測試](#ui-整合流程測試)
+  - [端對端 UI 測試工具與範圍](#端對端-ui-測試工具與範圍)
+- [無障礙（AX）實作細節](#無障礙ax實作細節)
+- [效能考量](#效能考量)
+- [國際化（i18n）與在地化（l10n）策略](#國際化i18n與在地化l10n策略)
+- [功能旗標管理](#功能旗標管理)
+- [前端安全性考量](#前端安全性考量)
+- [瀏覽器支援與漸進式增強](#瀏覽器支援與漸進式增強)
+- [變更紀錄](#變更紀錄)
 
-## Introduction
+## 簡介
 
-{ 本文件詳細說明 {Project Name} 前端的技術架構。此文件為主架構文件及 UI/UX 規格的補充，旨在為前端開發提供明確藍圖，確保一致性、可維護性，並與整體系統設計及用戶體驗目標保持一致。 }
+{ 本文件詳細說明 {Project Name} 前端的技術架構。此文件為主架構文件與 UI/UX 規格的補充，並以主架構文件（如 `docs/architecture.md` 或相關連結）中所定義的基礎決策（如技術棧、CI/CD、主要測試工具）為基礎，進一步說明前端架構。**如有前端專屬的補充或與通用模式不同之處，必須於此明確註記。** 目標是為前端開發提供清晰藍圖，確保一致性、可維護性，並與整體系統設計及用戶體驗目標保持一致。 }
 
-- **主架構文件連結：** {例如：`docs/architecture.md`}（註：整體系統架構，包括 Monorepo/Polyrepo 決策與後端結構，將影響前端選擇，特別是共用程式碼或 API 互動模式。）
-- **UI/UX 規格連結：** {例如：`docs/front-end-spec.md`}
-- **主要設計檔案連結（Figma、Sketch 等）：** {來自 UI/UX 規格}
+- **主架構文件連結（必填）：** {例如：`docs/architecture.md`}
+- **UI/UX 規格連結（如有必填）：** {例如：`docs/front-end-spec.md`}
+- **主要設計檔案連結（Figma、Sketch 等，若有必填）：** {來自 UI/UX 規格}
 - **已部署 Storybook / 元件展示（如適用）：** {URL}
 
-## Overall Frontend Philosophy & Patterns
+## 整體前端理念與模式
 
-{ 說明前端所採用的核心架構決策與模式。應與主架構文件中的「技術棧最終選擇」保持一致，並考量整體系統架構的影響（如 monorepo vs. polyrepo、後端服務結構）。 }
+{ 說明前端所採用的核心架構決策與設計模式。應與主架構文件中的「最終技術棧選擇」保持一致，並考量整體系統架構（如 monorepo 與 polyrepo、後端服務結構）之影響。 }
 
-- **框架與核心函式庫：** {例如：React 18.x with Next.js 13.x、Angular 16.x、Vue 3.x with Nuxt.js。如主架構文件未詳述，請簡要說明選擇原因。}
-- **元件架構：** {例如：Atomic Design 原則、Presentational vs. Container 元件、特定元件庫如 Material UI、Tailwind CSS 作為樣式方案。}
-- **狀態管理策略：** {例如：Redux Toolkit、Zustand、Vuex、NgRx。簡述整體做法－全域 store、功能 store、context API 使用等。詳細內容見「狀態管理深入探討」。}
-- **資料流：** {例如：單向資料流、資料如何取得、傳遞至元件及更新。}
-- **樣式處理方式：** {例如：CSS Modules、Styled Components、SCSS with BEM、Tailwind CSS。如有設定檔請附連結。}
-- **主要設計模式：** {例如：Provider pattern、Hooks、高階元件、API 呼叫服務模式。}
+- **框架與核心函式庫：** {例如：React 18.x with Next.js 13.x、Angular 16.x、Vue 3.x with Nuxt.js。**這些來源於主架構文件的「最終技術棧選擇」。** 本節說明這些選擇如何應用於前端。}
+- **元件架構：** {例如：Atomic Design 原則、展示型與容器型元件、指定元件庫如 Material UI、Tailwind CSS 作為樣式方案。請明確說明所選方案及主要函式庫。}
+- **狀態管理策略：** {例如：Redux Toolkit、Zustand、Vuex、NgRx。簡述整體做法－全域 store、功能 store、context API 使用。**參考主架構文件，並於「狀態管理深入說明」詳述。**}
+- **資料流：** {例如：單向資料流（Flux/Redux 模式）、React Query/SWR 處理伺服器狀態。說明資料如何取得、快取、傳遞至元件並更新。}
+- **樣式處理方式：** **{所選樣式方案，如 Tailwind CSS / CSS Modules / Styled Components}**。設定檔：{如 `tailwind.config.js`、`postcss.config.js`}。主要慣例：{如「Tailwind 採用 Utility-first 方式。自訂元件樣式於 `src/styles/components.css` 定義。主題擴充於 `tailwind.config.js` 的 `theme.extend`。CSS Modules 檔案與元件同目錄，如 `MyComponent.module.css`。」}
+- **主要設計模式：** {例如：Provider pattern、Hooks、高階元件、API 呼叫服務模式、容器/展示型。這些模式須一致應用，若有例外需說明並記錄。}
 
-## Detailed Frontend Directory Structure
+## 前端目錄結構詳解
 
-{ 請提供前端應用程式專屬資料夾結構的 ASCII 圖（如 `src/` 或 `app/` 內）。此圖需補充主架構文件中所述的專案結構，並強調元件、頁面/視圖、服務、狀態、樣式、資產等的組織慣例。 }
+{ 提供前端應用程式專屬目錄結構的 ASCII 圖（如 `src/`、`app/` 或 monorepo 下的 `frontend/` 根目錄）。此結構需補充主架構文件所述的專案結構，並強調元件、頁面/視圖、服務、狀態、樣式、資產等的組織慣例。每個主要目錄需有一句明確說明其用途。}
 
-### EXAMPLE - 僅供參考（以 React/Next.js 應用為例）
+### 範例－僅供參考（以 React/Next.js 應用為例）
 
 ```plaintext
 src/
-├── app/                        # Next.js App Router: Pages/Layouts/Routes
-│   ├── (features)/             # 以功能為單位的路由群組
+├── app/                        # Next.js App Router：頁面/版型/路由。必須包含路由區段、版型與頁面元件。
+│   ├── (features)/             # 以功能為單位的路由群組。必須將相關路由歸類於特定功能。
 │   │   └── dashboard/
-│   │       ├── layout.tsx
-│   │       └── page.tsx
-│   ├── api/                    # API 路由（如使用 Next.js 後端功能）
-│   ├── globals.css
-│   └── layout.tsx              # 根佈局
-├── components/                 # 共用/可重用 UI 元件
-│   ├── ui/                     # 基礎 UI 元素（Button、Input、Card－多來自元件庫）
+│   │       ├── layout.tsx      # dashboard 功能專屬版型。
+│   │       └── page.tsx        # dashboard 路由的進入頁元件。
+│   ├── api/                    # API 路由（如使用 Next.js 後端功能）。必須包含供前端呼叫的後端處理器。
+│   ├── globals.css             # 全域樣式。必須包含基礎樣式、CSS 變數、Tailwind 基本/元件/工具類。
+│   └── layout.tsx              # 全應用根版型。
+├── components/                 # 共用/可重用 UI 元件。
+│   ├── ui/                     # 基礎 UI 元素（Button、Input、Card）。僅能包含通用、可重用、展示型 UI 元件，通常對應設計系統。不得含業務邏輯。
 │   │   ├── Button.tsx
 │   │   └── ...
-│   ├── layout/                 # 佈局元件（Header、Footer、Sidebar）
+│   ├── layout/                 # 版型元件（Header、Footer、Sidebar）。僅能包含頁面結構元件，不含特定頁面內容。
 │   │   ├── Header.tsx
 │   │   └── ...
-│   └── (feature-specific)/     # 特定功能專屬但可於該功能重用的元件
+│   └── (feature-specific)/     # 特定功能專屬元件，但可於該功能內重用。此為與放於 features/ 目錄並存的替代方案。
 │       └── user-profile/
 │           └── ProfileCard.tsx
-├── features/                   # 功能專屬邏輯、hooks、非全域狀態、服務
+├── features/                   # 功能專屬邏輯、hooks、非全域狀態、服務及僅供該功能使用之元件。
 │   └── auth/
-│       ├── components/         # 僅供 auth 功能使用的元件
-│       ├── hooks/              # 功能專屬 hooks
-│       ├── services/           # 功能專屬 API 互動
-│       └── store.ts            # 功能專屬 state slice（如適用）
-├── hooks/                      # 全域/可共用自訂 hooks
+│       ├── components/         # 僅供 auth 功能使用之元件。不得被其他功能引用。
+│       ├── hooks/              # auth 功能專屬自訂 React Hook。可跨功能重用的 hook 請放於 `src/hooks/`。
+│       ├── services/           # auth 功能專屬 API 互動或協調。
+│       └── store.ts            # 功能專屬狀態切片（如 Redux slice），若非全域 store 或本地狀態複雜時使用。
+├── hooks/                      # 全域/可共用自訂 React Hook。必須為多功能/元件可用之泛用 hook。
 │   └── useAuth.ts
-├── lib/                        # 工具函式、輔助程式、常數
+├── lib/ / utils/             # 工具函式、輔助程式、常數。必須為純函式與常數，不得有副作用或框架專屬程式碼，除非明確命名（如 `react-helpers.ts`）。
 │   └── utils.ts
-├── services/                   # 全域 API 服務 client 或 SDK 設定
+├── services/                   # 全域 API 服務 client 或 SDK 設定。必須定義基礎 API client 實例及核心資料存取/變更服務。
 │   └── apiClient.ts
-├── store/                      # 全域狀態管理（如 Redux store 設定）
-│   ├── index.ts
-│   ├── rootReducer.ts
-│   └── (slices)/
-├── styles/                     # 全域樣式、主題設定（如未用 `globals.css`）
-└── types/                      # 全域 TypeScript 型別定義
+├── store/                      # 全域狀態管理設定（如 Redux store、Zustand store）。
+│   ├── index.ts                # 主要 store 設定與匯出。
+│   ├── rootReducer.ts          # 若使用 Redux，則為 root reducer。
+│   └── (slices)/               # 全域狀態切片目錄（如未與 features 並存）。
+├── styles/                     # 全域樣式、主題設定（如未用 `globals.css` 或特定樣式系統如 SCSS partials）。
+└── types/                      # 全域 TypeScript 型別定義/介面。必須為多功能/模組共用型別。
     └── index.ts
 ```
 
-### 前端結構說明：
+### 前端結構說明
 
-{ 說明本結構的具體慣例或設計理由。例如：「若元件僅於單一功能使用，則與該功能共置。」 }
+{ 說明結構背後的具體慣例或理由。例如：「若元件非全域可重用，則與功能共置以提升模組化。」AI Agent 必須嚴格遵循此結構。新檔案必須依據說明放置於正確目錄。 }
 
-## Component Breakdown & Implementation Details
+## 元件拆解與實作細節
 
-{ 本節說明 UI 元件的定義慣例與模板。部分全域共用或基礎元件（如非來自元件庫的核心 UI 元素、主要佈局結構）可於此先行規範以確保一致性，大多數功能專屬元件的詳細規格將隨 story 實作逐步產生。開發團隊（或 AI agent）於辨識新元件需求時，應依下方「元件規格模板」填寫。 }
+{ 本節說明 UI 元件的定義慣例與範本。多數功能專屬元件的詳細規格將隨 story 實作逐步產生。AI agent 每當辨識到新元件需開發時，必須依下方「元件規格範本」撰寫。 }
 
 ### 元件命名與組織
 
-{ 簡述元件命名慣例（如 PascalCase、`feature-ComponentName.tsx`）。元件於檔案系統如何組織（如需可重申目錄結構），是否依功能、型態（UI、layout）等分組？ }
+- **元件命名慣例：** **{例如：檔案與元件名稱皆採 PascalCase，如 `UserProfileCard.tsx`}**。所有元件檔案必須遵循此慣例。
+- **組織方式：** {例如：「全域可重用元件放於 `src/components/ui/` 或 `src/components/layout/`。功能專屬元件與功能目錄共置，如 `src/features/feature-name/components/`。詳見前端目錄結構詳解。」}
 
-### 元件規格模板
+### 元件規格範本
 
-{ 針對 UI/UX 規格與設計檔（Figma）中每個重要元件，請提供下列資訊。每個元件重複本小節。細節應足以讓 AI agent 或開發者據此實作，避免歧義。 }
+{ 每個自 UI/UX 規格與設計檔（Figma）辨識出的重要 UI 元件，皆須提供下列細節。每個元件重複本小節。細節須足以讓 AI agent 或開發者據此實作，無歧義。 }
 
 #### 元件：`{ComponentName}`（如 `UserProfileCard`、`ProductDetailsView`）
 
-- **用途：** {簡述此元件的功能及其在 UI 中的角色。}
-- **原始檔案：** {例如：`src/components/user-profile/UserProfileCard.tsx`}
-- **視覺參考：** {連結至特定 Figma 畫面/元件或 Storybook 頁面。}
+- **用途：** {簡要說明元件功能及其在 UI 中的角色。必須清楚明確。}
+- **原始檔案路徑：** {如：`src/components/user-profile/UserProfileCard.tsx`。必須為精確路徑。}
+- **視覺參考：** {連結至特定 Figma 畫面/元件或 Storybook 頁面。必填。}
 - **Props（屬性）：**
-  { 列出元件可接受的所有 prop。 }
-  | Prop Name | Type | 必填？ | 預設值 | 說明 |
-  | :-------------- | :--------------------------- | :-------- | :------------ | :---------------------------------------------- |
-  | `userId` | `string` | Yes | N/A | 要顯示的使用者 ID。 |
-  | `avatarUrl` | `string` | No | `null` | 使用者頭像圖片的 URL。 |
-  | `onEdit` | `() => void` | No | N/A | 觸發編輯動作時的回呼函式。 |
-  | `variant` | `'compact' | 'full'` | No | `'full'` | 控制卡片顯示模式。 |
-  | `{anotherProp}` | `{type (如 number, boolean, customType)}` | {Yes/No} | {如有} | {說明} |
+  { 列出元件接受的每個 prop。每個欄位皆須填寫。 }
+  | Prop 名稱 | 型別                                      | 必填？ | 預設值 | 說明                                                                                                |
+  | :-------------- | :---------------------------------------- | :-------- | :------------ | :--------------------------------------------------------------------------------------------------------- |
+  | `userId`        | `string`                                  | Yes       | N/A           | 要顯示的使用者 ID。必須為有效 UUID。                                                     |
+  | `avatarUrl`     | `string \| null`                          | No        | `null`        | 使用者頭像圖片的 URL。若有，必須為有效 HTTPS URL。                                    |
+  | `onEdit`        | `() => void`                              | No        | N/A           | 觸發編輯動作時的回呼函式。                                                        |
+  | `variant`       | `\'compact\' \| \'full\'`                     | No        | `\'full\'`        | 控制卡片顯示模式。                                                                   |
+  | `{anotherProp}` | `{Specific primitive, imported type, or inline interface/type definition}` | {Yes/No}  | {If any}    | {必須明確說明 prop 用途及限制，例如「必須為正整數」。}         |
 - **內部狀態（如有）：**
-  { 說明元件管理的主要內部狀態。簡單 UI 狀態（如 `isDropdownOpen`）若不複雜可不列。 }
-  | State Variable | Type | 初始值 | 說明 |
-  | :-------------- | :--------- | :------------ | :-------------------------------------------- |
-  | `isLoading` | `boolean` | `false` | 標記元件資料是否載入中。 |
-  | `{anotherState}`| `{type}` | `{value}` | {說明} |
-- **主要 UI 元素／結構：**
-  { 描述元件主要視覺組成與大致排版。可用簡要文字或簡單 pseudo-HTML。 }
+  { 說明元件自行管理的主要內部狀態。僅列出非由 props 或全域狀態衍生之狀態。若狀態複雜，請考慮是否應由自訂 hook 或全域狀態管理。 }
+  | 狀態變數 | 型別      | 初始值 | 說明                                                                    |
+  | :-------------- | :-------- | :------------ | :----------------------------------------------------------------------------- |
+  | `isLoading`     | `boolean` | `false`       | 追蹤元件資料是否載入中。                                   |
+  | `{anotherState}`| `{type}`  | `{value}`     | {說明狀態變數及其用途。}                               |
+- **主要 UI 結構：**
+  { 提供元件 DOM 的 pseudo-HTML 或 JSX 結構。若有條件渲染請一併說明。**此結構為 AI agent 產出元件的主要依據。** }
   ```html
-  <div> <!-- 主卡片容器 -->
-    <img> <!-- 頭像 -->
-    <h2> <!-- 使用者名稱 -->
-    <p>  <!-- 使用者 Email -->
-    <button> <!-- 編輯按鈕（如適用） -->
+  <div> <!-- 主要卡片容器，依 variant prop 套用 styles.cardFull 或 styles.cardCompact 等類別 -->
+    <img src="{avatarUrl || defaultAvatar}" alt="User Avatar" class="{styles.avatar}" />
+    <h2>{userName}</h2>
+    <p class="{variant === 'full' ? styles.emailFull : styles.emailCompact}">{userEmail}</p>
+    {variant === 'full' && onEdit && <button onClick={onEdit} class="{styles.editButton}">Edit</button>}
   </div>
   ```
-- **事件處理／發出：**
-  - **處理：** {如：編輯按鈕的 `onClick`。}
-  - **發出：** {如元件會發出自訂事件，請描述。例如：`onFollow: (userId: string) => void`}
+- **事件處理 / 發出：**
+  - **處理：** {如：edit 按鈕的 `onClick`（觸發 `onEdit` prop）。}
+  - **發出：** {若元件會發出自訂事件/回呼且非 prop，請說明其簽名。如：`onFollow: (payload: { userId: string; followed: boolean }) => void`}
 - **觸發動作（副作用）：**
-  - **狀態管理：** {如：「元件掛載時 dispatch `fetchUserDetails(userId)` action。」、「呼叫 `userSlice.actions.setUserName(newName)`。」}
-  - **API 呼叫：** {說明會呼叫「API 互動層」的哪些服務/函式。例如：「呼叫 `userService.fetchUser(userId)`。」傳遞哪些資料？如何處理回應（成功/失敗）？如何更新內部或全域狀態？}
+  - **狀態管理：** {如：「派發 `userSlice.actions.setUserName(newName)`（來自 `src/store/slices/userSlice.ts`）。Action payload 必須符合定義。」或「呼叫本地 useReducer hook 的 `updateUserProfileOptimistic(newData)`。」}
+  - **API 呼叫：** {說明會呼叫「API 互動層」中的哪個服務/函式。如：「元件掛載時呼叫 `src/services/userService.ts` 的 `userService.fetchUser(userId)`。請求 payload：`{ userId }`。成功回應填入內部狀態 `userData`。錯誤則派發 `uiSlice.actions.showErrorToast({ message: 'Failed to load user details' })`。」}
 - **樣式說明：**
-  - {引用設計系統元件（如：「使用 UI library 的 `<Button variant='primary'>`」）。}
-  - {如直接用 CSS/SCSS/Tailwind，請列出主要 class。}
-  - {如有特殊響應式需求，請說明。}
+  - {必須註明設計系統元件名稱（如「使用 UI library 的 `<Button variant='primary'>`」），或指定 Tailwind CSS 類別 / CSS module 類名（如「容器用 `p-4 bg-white rounded-lg shadow-md`，標題用 `text-xl font-semibold`」），或 SCSS 自訂元件類別（如「容器用 `@apply p-4 bg-white rounded-lg shadow-md`，標題用 `@apply text-xl font-semibold`」）。如有依 props 或狀態動態樣式，必須說明。若用 Tailwind，請列出主要 utility class 或 `@apply` 指令。簡單情境優先直接用 utility class，複雜則建議抽 reusable component class/React component。}
 - **無障礙說明：**
-  - {需加註的 ARIA 屬性（如 `aria-label`、`role`）。}
-  - {此元件的鍵盤操作考量。}
+  - {必須列出具體 ARIA 屬性及其值（如 `aria-label="User profile card"`、`role="article"`）、必要鍵盤操作（如「Tab 順序為頭像、姓名、信箱、編輯按鈕。編輯按鈕可聚焦並可用 Enter/Space 觸發」）、及焦點管理需求（如「若此元件開啟 modal，必須鎖定焦點，關閉時焦點回到觸發元件」）。}
 
 ---
 
-_請針對每個重要元件重複上述模板。_
+_每個重要元件請重複上述範本。_
 
 ---
 
-## 狀態管理深入探討
+## 狀態管理深入說明
 
-{ 本節補充主架構文件及「整體前端理念」中所述的狀態管理策略，並定義 state module 的結構與實作慣例。整體做法與核心 store 設定（如有）於此說明，具體功能的 state slice、selector、action/thunk 會隨功能開發時依本慣例產生。 }
+{ 本節補充狀態管理策略。**請參考主架構文件以確認最終狀態管理方案。** }
 
-- **選用方案：** {例如：Redux Toolkit、Zustand、Vuex、NgRx－可重申主架構文件內容。}
-- **選擇理由（如主架構文件未詳述）：** {為何本專案選擇此方案而非其他？}
+- **選用方案：** {如 Redux Toolkit、Zustand、Vuex、NgRx－依主架構文件定義。}
+- **狀態存放決策指引：**
+    - **全域狀態（如 Redux/Zustand）：** 跨多個無關元件共用、跨路由持續、複雜邏輯需 reducer/thunk 管理之資料。**必須用於 session 資料、使用者偏好、全域通知。**
+    - **React Context API：** 僅於特定元件子樹傳遞（如主題、表單 context），較簡單且更新頻率低於全域狀態。**適用於不宜 prop drilling 但又不需全域的本地狀態。**
+    - **本地元件狀態（`useState`、`useReducer`）：** 僅元件或其直屬子元件需用之 UI 狀態（如表單輸入值、下拉開關）。**除非需用 Context 或全域狀態，否則預設採用本地狀態。**
 
 ### Store 結構 / Slices
 
-{ 說明全域狀態的組織慣例（如：「每個需全域狀態的主要功能，於 `src/features/[featureName]/store.ts` 建立專屬 Redux slice。」）。部分核心、全域 slice（如 session 管理、主題）可先行定義作為範例或基礎。 }
+{ 說明全域狀態組織慣例（如「每個需全域狀態之主要功能，於 `src/features/[featureName]/store.ts` 各自設置 Redux slice」）。 }
 
-- **核心 Slice 範例（如 `sessionSlice`）：**
-  - **用途：** {管理使用者 session、認證狀態及全域可存取的基本個人資料。}
-  - **狀態結構：**
+- **核心 Slice 範例（如 `sessionSlice` 於 `src/store/slices/sessionSlice.ts`）：**
+  - **用途：** {管理使用者 session、認證狀態及全域可存取之基本個人資料。}
+  - **狀態結構（Interface/Type）：**
     ```typescript
     interface SessionState {
-      currentUser: {
-        id: string;
-        name: string;
-        email: string;
-        roles: string[];
-      } | null;
+      currentUser: { id: string; name: string; email: string; roles: string[]; } | null;
       isAuthenticated: boolean;
       token: string | null;
       status: "idle" | "loading" | "succeeded" | "failed";
       error: string | null;
     }
     ```
-  - **主要 Reducer/Action：** {簡列主要 action，如 `setSession`、`clearSession`、`authLoading`、`authSuccess`、`authFailure`。}
-- **功能 Slice 模板（如 `{featureName}Slice`）：**
-  - **用途：** {當新功能需專屬 state slice 時補充。}
-  - **狀態結構：** {由該功能定義。}
-  - **主要 Reducer/Action：** {由該功能定義。}
+  - **主要 Reducer/Action（於 `createSlice` 內）：** {簡列主要同步 action，如 `setCurrentUser`、`clearSession`、`setAuthStatus`、`setAuthError`。}
+  - **非同步 Thunk（如有）：** {列出主要 async thunk，如 `loginUserThunk`、`fetchUserProfileThunk`。}
+  - **Selector（以 `createSelector` 記憶化）：** {列出主要 selector，如 `selectCurrentUser`、`selectIsAuthenticated`。}
+- **功能 Slice 範本（如 `{featureName}Slice` 於 `src/features/{featureName}/store.ts`）：**
+  - **用途：** {新功能需自訂 state slice 時補充。}
+  - **狀態結構（Interface/Type）：** {由功能定義。}
+  - **主要 Reducer/Action（於 `createSlice` 內）：** {由功能定義。}
+  - **非同步 Thunk（如有，使用 `createAsyncThunk`）：** {由功能定義。}
+  - **Selector（以 `createSelector` 記憶化）：** {由功能定義。}
+  - **匯出：** {所有 action 與 selector 必須匯出。}
 
 ### 主要 Selector
 
-{ 列出任何核心、預先定義 slice 的重要 selector。功能 slice 的 selector 於該 slice 定義。請說明 selector 的建立慣例（如：建議用 `createSelector` 以利記憶化）。 }
+{ 列出任何核心、預設 slice 的重要 selector。新功能 slice 的 selector 於該 slice 定義。**所有衍生資料或組合多個 state 的 selector 必須用 Reselect 的 `createSelector`（或其他狀態庫等效方案）記憶化。** }
 
-- **`selectCurrentUser`：** {回傳 `sessionSlice` 的 `currentUser` 物件。}
-- **`selectIsAuthenticated`：** {回傳 `sessionSlice` 的 `isAuthenticated` 布林值。}
-- **`selectAuthToken`：** {回傳 `sessionSlice` 的 `token`。}
+- **`selectCurrentUser`（來自 `sessionSlice`）：** {回傳 `currentUser` 物件。}
+- **`selectIsAuthenticated`（來自 `sessionSlice`）：** {回傳 `isAuthenticated` 布林值。}
+- **`selectAuthToken`（來自 `sessionSlice`）：** {回傳 `sessionSlice` 的 `token`。}
 
 ### 主要 Action / Reducer / Thunk
 
-{ 詳述核心、預先定義 slice 的複雜 action，特別是非同步 thunk 或 saga。功能 slice 的 action/thunk 於該 slice 定義，並遵循本慣例。 }
+{ 詳述核心、預設 slice 中較複雜的 action，特別是 async thunk 或 saga。每個 thunk 必須明確說明用途、參數、API 呼叫（參考 API 互動層），以及 pending/fulfilled/rejected 狀態下如何更新 state。 }
 
-- **核心 Action/Thunk 範例：`authenticateUser(credentials: AuthCredentials)`**
+- **核心 Action/Thunk 範例：`authenticateUser(credentials: AuthCredentials)`（於 `sessionSlice.ts`）：**
   - **用途：** {處理使用者登入，呼叫認證 API 並更新 `sessionSlice`。}
-  - **Dispatch 流程：**
-    1. dispatch `sessionSlice.actions.setStatus('loading')`
-    2. 呼叫 `authService.login(credentials)`（來自 API 互動層）
-    3. 成功時：dispatch `sessionSlice.actions.setSession(response.data)`（含 user 與 token）及 `sessionSlice.actions.setStatus('succeeded')`
-    4. 失敗時：dispatch `sessionSlice.actions.setError(error.message)` 及 `sessionSlice.actions.setStatus('failed')`
-- **功能 Action/Thunk 模板：`{featureActionName}`**
-  - **用途：** {針對功能專屬非同步操作補充。}
-  - **Dispatch 流程：** {由該功能定義，並遵循上述模式。}
+  - **參數：** `credentials: { email: string; password: string }`
+  - **派發流程（用 Redux Toolkit `createAsyncThunk`）：**
+    1. `pending` 時：派發 `sessionSlice.actions.setAuthStatus('loading')`。
+    2. 呼叫 `src/services/authService.ts` 的 `authService.login(credentials)`。
+    3. `fulfilled`（成功）：派發 `sessionSlice.actions.setCurrentUser(response.data.user)`、`sessionSlice.actions.setToken(response.data.token)`、`sessionSlice.actions.setAuthStatus('succeeded')`。
+    4. `rejected`（錯誤）：派發 `sessionSlice.actions.setAuthError(error.message)`、`sessionSlice.actions.setAuthStatus('failed')`。
+- **功能 Action/Thunk 範本：`{featureActionName}`（於 `{featureName}Slice.ts`）：**
+  - **用途：** {功能專屬 async 操作時補充。}
+  - **參數：** {明確定義參數型別。}
+  - **派發流程（用 `createAsyncThunk`）：** {由功能定義，流程同上，須說明 API 呼叫與 state 更新。}
 
 ## API 互動層
 
-{ 說明前端如何與主架構文件中定義的後端 API 溝通。重點在於建立基礎 client 設定與服務抽象模式。具體服務函式多隨功能開發逐步產生。 }
+{ 說明前端如何與主架構文件定義的後端 API 溝通。 }
 
 ### Client/Service 結構
 
-- **HTTP Client 設定：** {例如：Axios instance、Fetch 包裝。Base URL 設定、預設標頭（如從 state 取得 Authorization）、請求/回應攔截器（如錯誤標準化、token 更新）。}
-- **服務定義（範例）：**
-  - **`userService.ts`：**
+- **HTTP Client 設定：** {如於 `src/services/apiClient.ts` 設定 Axios 實例。**必須**包含：Base URL（來自環境變數 `NEXT_PUBLIC_API_URL` 或同等）、預設標頭（如 `Content-Type: 'application/json'`）、自動注入認證 token 的攔截器（來自狀態管理，如 `sessionSlice.token`），及標準化錯誤處理/正規化（見下）。}
+- **Service 定義（範例）：**
+  - **`userService.ts`（於 `src/services/userService.ts`）：**
     - **用途：** {處理所有與使用者相關的 API 互動。}
-    - **函式：**
+    - **函式：** 每個 service 函式必須明確參數型別、回傳型別（如 `Promise<User>`）、JSDoc/TSDoc 說明用途、參數、回傳值及特殊錯誤處理。必須呼叫設定好的 HTTP client（`apiClient`），正確指定 endpoint、method、payload。
       - `fetchUser(userId: string): Promise<User>`
       - `updateUserProfile(userId: string, data: UserProfileUpdateDto): Promise<User>`
-  - **`productService.ts`：**
+  - **`productService.ts`（於 `src/services/productService.ts`）：**
     - **用途：** {...}
     - **函式：** {...}
 
 ### 錯誤處理與重試（前端）
 
-- **全域錯誤處理：** {API 錯誤如何被全域攔截並呈現給使用者（如 toast 通知）？是否有全域錯誤狀態？}
-- **特定錯誤處理：** {元件如何針對特定 API 錯誤給予更具情境的回饋？}
-- **重試邏輯：** {是否有針對冪等請求的前端重試機制？如有，如何設定？}
+- **全域錯誤處理：** {API 錯誤如何全域攔截（如於 `apiClient.ts` 的 Axios response interceptor）。如何顯示/記錄（如派發 `uiSlice.actions.showGlobalErrorBanner({ message: error.message })`，詳細錯誤記錄於 console/監控服務）。是否有全域錯誤狀態（如 `uiSlice.error`）。}
+- **特定錯誤處理：** {元件可於本地處理特定 API 錯誤以提供更具情境的回饋（如表單欄位顯示「Email 格式錯誤」）。如與全域處理不同，必須於元件規格說明。}
+- **重試邏輯：** {是否有前端重試機制（如 `apiClient` 配合 `axios-retry`）。如有，請說明設定：最大重試次數（如 3）、重試條件（如網路錯誤、5xx server 錯誤）、重試延遲（如指數退避）。**僅適用於冪等請求（GET、PUT、DELETE）。**}
 
 ## 路由策略
 
-{ 詳述前端應用的導覽與路由處理方式。 }
+{ 詳細說明前端應用的導覽與路由處理方式。 }
 
-- **路由函式庫：** {例如：React Router、Next.js App Router、Vue Router、Angular Router。}
+- **路由函式庫：** {如 React Router、Next.js App Router、Vue Router、Angular Router。依主架構文件。}
 
 ### 路由定義
 
-{ 列出應用的主要路由及各路由對應的主要元件。 }
+{ 列出應用主要路由及對應的主要元件/頁面。 }
 
-| Path Pattern           | Component/Page                | Protection    | Notes                               |
-| :--------------------- | :---------------------------- | :------------ | :---------------------------------- |
-| `/`                    | `HomePage.tsx`                | Public        |                                     |
-| `/login`               | `LoginPage.tsx`               | Public        | 已登入時自動導向。                 |
-| `/dashboard`           | `DashboardPage.tsx`           | Authenticated |                                     |
-| `/products`            | `ProductListPage.tsx`         | Public        |                                     |
-| `/products/:productId` | `ProductDetailsPage.tsx`      | Public        |                                     |
-| `/settings/profile`    | `UserProfileSettingsPage.tsx` | Authenticated |                                     |
-| `{anotherRoute}`       | `{Component}`                 | {Type}        | {Notes}                             |
+| 路徑模式           | 元件/頁面（`src/app/...` 或 `src/pages/...`） | 保護機制                      | 備註                                                 |
+| :--------------------- | :-------------------------------------------------- | :------------------------------ | :---------------------------------------------------- |
+| `/`                    | `app/page.tsx` 或 `pages/HomePage.tsx`              | `Public`                        |                                                       |
+| `/login`               | `app/login/page.tsx` 或 `pages/LoginPage.tsx`       | `Public`（若已登入則導向）     | 已登入則導向 `/dashboard`。   |
+| `/dashboard`           | `app/dashboard/page.tsx` 或 `pages/DashboardPage.tsx` | `Authenticated`                 |                                                       |
+| `/products`            | `app/products/page.tsx`                             | `Public`                        |                                                       |
+| `/products/:productId` | `app/products/[productId]/page.tsx`                 | `Public`                        | 參數：`productId`（string）                       |
+| `/settings/profile`    | `app/settings/profile/page.tsx`                     | `Authenticated`、`Role:[USER]`  | 角色權限保護範例。                   |
+| `{anotherRoute}`       | `{ComponentPath}`                                   | `{Public/Authenticated/Role:[ROLE_NAME]}` | {備註、參數名稱與型別}                    |
 
-### 路由守衛 / 保護
+### 路由守衛 / 保護機制
 
-- **認證守衛：** {說明如何根據認證狀態保護路由。例如：高階元件、特定 router hook。}
-- **授權守衛（如適用）：** {說明如何根據使用者角色或權限保護路由。}
+- **認證守衛：** {說明如何依認證狀態保護路由。**請明確指定 HOC、hook、layout 或 middleware 及其路徑**（如 `src/guards/AuthGuard.tsx`，或 Next.js 的 `middleware.ts`）。邏輯必須使用 `sessionSlice`（或等效）之認證狀態。未認證用戶存取受保護路由時必須導向 `/login`（或指定登入頁）。}
+- **授權守衛（如適用）：** {說明如何依角色或權限保護路由。**請明確指定機制**，同上。未授權用戶（已登入但無權限）必須顯示「禁止存取」頁或導向安全頁。}
 
 ## 建置、打包與部署
 
-{ 補充主架構文件「基礎設施與部署概述」中有關前端建置與部署的細節。 }
+{ 補充前端建置與部署流程，對應主架構文件的「基礎設施與部署概述」。 }
 
 ### 建置流程與腳本
 
-- **主要建置腳本：** {例如：`npm run build`、`yarn build`。說明其作用，並指向 `package.json` 腳本。}
-- **建置時環境變數處理：** {如 `process.env` 變數（如 `NEXT_PUBLIC_API_URL`）於不同環境（dev、staging、prod）如何管理？}
+- **主要建置腳本（來自 `package.json`）：** {如 `"build": "next build"`。說明其功能，並指向 `package.json` 腳本。`"dev": "next dev"`、`"start": "next start"`。} **AI Agent 不得產生硬編環境值之程式碼，所有環境值必須透過定義的環境設定機制取得。**請明確指定檔案與存取方式。
+- **環境設定管理：** {如 `process.env.NEXT_PUBLIC_API_URL`（或 `import.meta.env.VITE_API_URL`）於不同環境（dev、staging、prod）如何管理（如 Next.js/Vite 用 `.env`、`.env.development`、`.env.production`，或 CI 注入）。請明確指定檔案與存取方式。}
 
 ### 主要打包優化
 
-- **程式碼分割：** {如何實作？如依路由、依元件動態載入。}
-- **Tree Shaking：** {是否由建置工具自動處理？}
-- **Lazy Loading：** {元件、圖片或路由的延遲載入策略。}
-- **壓縮與最小化：** {是否由建置工具（如 Webpack、Vite、Next.js build）自動處理？}
+- **程式碼分割：** {如何實作/確保（如「Next.js/Vite 自動處理路由分割。元件級分割則用 `React.lazy(() => import('./MyComponent'))` 或 `import('./heavy-module')` 處理大型非關鍵元件/函式庫。」）}
+- **Tree Shaking：** {如何實作/確保（如「Next.js/Vite 採用 ES Modules，Webpack/Rollup 自動 tree shaking。共用函式庫避免副作用 import。」）}
+- **延遲載入（元件、圖片等）：** {延遲載入策略（如「元件用 `React.lazy` 搭配 `Suspense`。圖片用框架專屬 Image 元件（如 `next/image`，預設延遲載入），或標準 `<img>` 標籤加 `loading='lazy'`。」）}
+- **壓縮與壓縮：** {由建置工具（如 Webpack/Terser、Vite/esbuild）處理？如有特殊設定請說明。壓縮（如 Gzip、Brotli）通常由主機/CDN 處理。}
 
-### 部署至 CDN/Hosting
+### 部署至 CDN/主機
 
-- **目標平台：** {例如：Vercel、Netlify、AWS S3/CloudFront、Azure Static Web Apps。}
-- **部署觸發條件：** {例如：Git push 至 main branch 透過 GitHub Actions（參考主 CI/CD）。}
-- **資產快取策略：** {靜態資產於 CDN/瀏覽器如何快取？}
+- **目標平台：** {如 Vercel、Netlify、AWS S3/CloudFront、Azure Static Web Apps。依主架構文件。}
+- **部署觸發條件：** {如 Git push 至 `main` 分支，透過 GitHub Actions（參考主 CI/CD pipeline）。}
+- **資產快取策略：** {靜態資產如何快取（如「不可變資產（帶 content hash 的 JS/CSS bundle）設 `Cache-Control: public, max-age=31536000, immutable`。HTML 設 `Cache-Control: no-cache` 或短 max-age（如 `public, max-age=0, must-revalidate`），確保入口頁新鮮。由主機平台設定、`next.config.js` headers 或 CDN 規則配置。」}
 
 ## 前端測試策略
 
-{ 本節補充主架構文件「測試策略」中有關前端的細節。 }
+{ 本節補充主架構文件的「測試策略」，聚焦前端。**測試工具最終選擇請參考主架構文件。** }
 
-- **主測試策略連結：** {請參考主文件 `docs/testing-strategy.md` 或架構文件相關章節。}
+- **主測試策略連結：** {請參考主文件 `docs/architecture.md#overall-testing-strategy` 或同等。}
 
 ### 元件測試
 
-- **範圍：** {針對單一 UI 元件的測試（類似元件單元測試）。}
-- **工具：** {例如：React Testing Library、Jest、Vitest、Vue Test Utils、Angular Testing Utilities。}
-- **重點：** {渲染、props 處理、基本互動、事件發出、視覺快照測試（如有）。}
-- **位置：** {例如：元件旁的 `*.test.tsx` 或 `*.spec.tsx`。}
+- **範圍：** {單獨測試 UI 元件（類似元件單元測試）。}
+- **工具：** {如 React Testing Library with Jest、Vitest、Vue Test Utils、Angular Testing Utilities。依主架構文件。}
+- **重點：** {以不同 props 渲染、用戶互動（點擊、輸入變更，使用 `fireEvent` 或 `userEvent`）、事件發出、基本內部狀態變化。**快照測試僅於極穩定、純展示且 DOM 結構複雜時使用，並需明確理由；一般優先明確斷言。**}
+- **位置：** {如 `*.test.tsx` 或 `*.spec.tsx` 與元件同目錄，或於 `__tests__` 子目錄。}
 
-### UI 整合/流程測試
+### 功能/流程測試（UI 整合）
 
-- **範圍：** {測試多個元件如何協作完成單一頁面或功能內的小型用戶流程，可模擬 API 呼叫或狀態管理。}
-- **工具：** {同元件測試，但設定更複雜。}
-- **重點：** {元件間資料流、互動後條件渲染、功能內導覽。}
+- **範圍：** {測試多個元件於頁面內共同完成小型用戶流程或功能，可能需 mock API 或全域狀態。例如測試完整表單送出流程，含驗證與 mock 服務層互動。}
+- **工具：** {同元件測試（如 React Testing Library with Jest/Vitest），但需更複雜的 mock provider（路由、狀態、API）。}
+- **重點：** {元件間資料流、互動條件渲染、功能內部導覽、與 mock 服務/狀態整合。}
 
 ### 端對端 UI 測試工具與範圍
 
 - **工具：** {重申主測試策略，如 Playwright、Cypress、Selenium。}
-- **範圍（前端重點）：** {定義 E2E UI 測試涵蓋的主要用戶旅程。例如：用戶註冊、加入購物車、完成結帳。}
-- **UI 測試資料管理：** {如何確保 UI E2E 測試資料一致性？}
+- **範圍（前端重點）：** {定義 3-5 個必須涵蓋的 E2E UI 測試用戶旅程，如「用戶註冊與登入流程」、「加入購物車並進入結帳頁摘要」、「送出多步驟表單並驗證成功 UI 狀態與資料持久化（可用 API mock 或測試後端）」等。}
+- **UI 測試資料管理：** {E2E 測試如何維持一致測試資料（如 MSW API mock、後端種子腳本、專用測試帳號）。}
 
 ## 無障礙（AX）實作細節
 
-{ 根據 UI/UX 規格中的 AX 要求，說明技術實作方式。 }
+{ 依 UI/UX 規格之 AX 要求，說明技術實作方式。 }
 
-- **語意化 HTML：** {強調正確使用 HTML5 元素。}
-- **ARIA 實作：** {自訂/複雜元件需加註的 ARIA role、state、property。}
-- **鍵盤操作：** {確保所有互動元素可聚焦並可用鍵盤操作。}
-- **焦點管理：** {於 modal、動態內容變更時如何管理焦點。}
-- **AX 測試工具：** {例如：Axe DevTools、Lighthouse、人工測試流程。}
+- **語意化 HTML：** {強調正確使用 HTML5 元素。**AI Agent 必須優先用語意元素（如 `<nav>`、`<button>`、`<article>`），避免用 ARIA role 的 `<div>`/`<span>`，除非無原生語意元素可用。**}
+- **ARIA 實作：** {說明常見自訂元件所需 ARIA pattern（如「自訂下拉選單必須符合 ARIA Combobox pattern，含 `aria-expanded`、`aria-controls`、`role='combobox'` 等。自訂分頁元件必須符合 ARIA Tabbed Interface pattern。」）。請附 ARIA Authoring Practices Guide (APG) 參考連結。}
+- **鍵盤操作：** {確保所有互動元件可聚焦並可用鍵盤操作。焦點順序必須合理。自訂元件必須依 ARIA APG 實作鍵盤互動（如 radio group/slider 用方向鍵）。**}
+- **焦點管理：** {說明 modal、動態內容變化、路由切換時如何管理焦點（如「modal 必須鎖定焦點，開啟時聚焦第一個可聚焦元素或容器，關閉時焦點回到觸發元件。路由切換應將焦點移至主內容區或新頁 H1。」）}
+- **AX 測試工具：** {如 Axe DevTools 瀏覽器擴充、Lighthouse 無障礙檢查。**自動化 Axe 掃描（如 `jest-axe` 元件測試、Playwright/Cypress Axe 整合 E2E 測試）必須納入 CI pipeline，違反 WCAG AA（或指定等級）須使建置失敗。**手動測試流程：{列出主要手動檢查，如所有互動元件鍵盤操作、重要流程用螢幕閱讀器（NVDA/JAWS/VoiceOver）測試。}}
 
 ## 效能考量
 
-{ 強調前端專屬的效能最佳化策略。 }
+{ 強調前端專屬效能最佳化策略。 }
 
 - **圖片最佳化：** {格式（如 WebP）、響應式圖片（`<picture>`、`srcset`）、延遲載入。}
-- **程式碼分割與 Lazy Loading（如需可重申建置章節）：** {其對體感效能的影響。}
-- **最小化重繪：** {如 `React.memo`、`shouldComponentUpdate`、最佳化 selector 等技巧。}
-- **Debounce/Throttle：** {如搜尋輸入、視窗縮放等事件處理。}
-- **虛擬化：** {長列表或大量資料（如 React Virtualized、TanStack Virtual）。}
+  - 實作要求：{如「所有圖片必須用 Next.js `<Image>` 元件（或等效框架最佳化元件）。icon 用 SVG。WebP 為優先格式。」}
+- **程式碼分割與延遲載入（如需重申建置節）：** {其對效能感知的影響。}
+  - 實作要求：{如「Next.js 自動處理路由分割。元件級延遲載入必須用動態 import。」}
+- **減少重繪：** {如 `React.memo`、`shouldComponentUpdate`、最佳化 selector。}
+  - 實作要求：{如「頻繁渲染且 props 不變的元件必須用 `React.memo`。全域狀態 selector 必須記憶化（如 Reselect）。避免於 render 直接傳新物件/陣列/函式作為 props，避免不必要重繪。」}
+- **防抖/節流：** {如搜尋輸入、視窗縮放等事件處理。}
+  - 實作要求：{如「指定事件處理必須用 `lodash.debounce` 或 `lodash.throttle`。請定義等待時間。」}
+- **虛擬化：** {大量清單或大數據集（如 React Virtualized、TanStack Virtual）。}
+  - 實作要求：{如「渲染超過 {N, 例如 100} 筆資料時，若效能下降必須用虛擬化。」}
 - **快取策略（前端）：** {瀏覽器快取、PWA service worker（如適用）。}
-- **效能監控工具：** {例如：Lighthouse、WebPageTest、瀏覽器 DevTools 效能分析。}
+  - 實作要求：{如「PWA 須設定 service worker 快取應用殼與主要靜態資產。其他資產依部署節快取 header 設定。」}
+- **效能監控工具：** {如 Lighthouse、WebPageTest、瀏覽器 DevTools 效能頁籤。請指定主要工具及 CI 自動檢查。}
+
+## 國際化（i18n）與在地化（l10n）策略
+
+{本節說明多語系與地區差異支援策略。如無需求，請註明「本專案目前無國際化需求」。}
+
+- **需求層級：** {如無需求、僅特定語言、完全國際化以利未來擴充。}
+- **選用 i18n 函式庫/框架：** {如 `react-i18next`、`vue-i18n`、`ngx-translate`、框架原生方案如 Next.js i18n routing。請明確指定。}
+- **翻譯檔結構與格式：** {如每功能每語言一 JSON（`src/features/{featureName}/locales/{lang}.json`），或全域（`public/locales/{lang}.json`）。請明確指定路徑與格式（如扁平 JSON、巢狀 JSON）。}
+- **翻譯 key 命名慣例：** {如 `featureName.componentName.elementText`、`common.submitButton`。必須明確、一致並有文件。}
+- **新增可翻譯字串流程：** {如「AI Agent 必須將新 key 加入預設語言檔（如 `en.json`），並用 i18n 函式/元件（如 `<Trans>`、`t()`）渲染。key 不得於執行時動態組合，避免靜態分析失效。」}
+- **複數處理：** {請說明方法/語法，如選用函式庫的 ICU message format（如 `t('key', { count: N })`）。}
+- **日期、時間、數字格式化：** {說明是否由 i18n 函式庫處理，或另用（如 `date-fns-tz`、`Intl` API），並指定各語系格式。}
+- **預設語言：** {如 `en-US`}
+- **語言切換機制（如適用）：** {用戶如何切換語言並持久化（如「語言選擇元件更新全域狀態/cookie，或改變 URL 路徑」）。}
+
+## 功能旗標管理
+
+{本節說明條件式功能啟用管理。如無需求，請註明「本專案目前不以功能旗標為主要架構考量」。}
+
+- **需求層級：** {如無需求、僅特定功能漸進釋出、開發流程核心。}
+- **選用旗標系統/函式庫：** {如 LaunchDarkly、Unleash、Flagsmith、自訂方案（環境變數或設定服務）。請明確指定。}
+- **程式碼存取旗標方式：** {如「自訂 hook `useFeatureFlag('flag-name'): boolean`，或服務 `featureFlagService.isOn('flag-name')`。請明確指定介面、位置、初始化方式。」}
+- **旗標命名慣例：** {如 `[SCOPE]_[FEATURE_NAME]_[TARGET_GROUP_OR_TYPE]`，如 `CHECKOUT_NEW_PAYMENT_GATEWAY_ROLLOUT`、`USER_PROFILE_BETA_AVATAR_UPLOAD`。必須有文件並一致應用。}
+- **旗標功能程式碼結構：** {如「用條件渲染（`{isFeatureEnabled && <NewComponent />}`）。大型功能可條件 import 元件（`React.lazy` 搭配旗標判斷）或路由。避免於共用元件深層分支，應於高層判斷。」}
+- **旗標退役後程式碼清理策略：** {如「旗標 100% rollout 或移除後，所有條件邏輯、舊路徑與旗標本身必須於 {N, 例如 2} 個 sprint 內移除，屬強制技術債。」}
+- **旗標功能測試：** {不同旗標組合如何測試（如 QA 用 debug 面板切換，E2E 自動測試以特定旗標組態執行）。}
+
+## 前端安全性考量
+
+{本節補充前端專屬安全實踐，對應主架構文件。AI Agent 必須遵循。}
+
+- **跨站腳本（XSS）防護：**
+  - 框架自動防護：{如「React JSX 自動跳脫，渲染動態內容必須依賴此機制。Vue 的 `v-html` 除非內容已明確淨化，否則不得用。」}
+  - 顯式淨化：{如不得已需直接操作 DOM，必須用指定淨化函式庫（如 DOMPurify），並說明設定。}
+  - 內容安全政策（CSP）：{是否有 CSP，如何實作（如「CSP 由後端/CDN HTTP header 設定，詳見主架構文件。前端如禁用 `unsafe-inline`，需確保 inline script 有 nonce。」並附 CSP 定義連結）。}
+- **跨站請求偽造（CSRF）防護（如 session-based auth 適用）：**
+  - 機制：{如「後端採同步 token 模式。前端於狀態變更請求時確保帶入 token，若 HTTP client 或表單未自動處理。」詳見主架構文件。}
+- **安全 token 儲存與處理（如 JWT 等 client token）：**
+  - 儲存機制：{**必須明確說明**：如以狀態管理（Redux/Zustand）於記憶體儲存（關閉分頁即清除）、`HttpOnly` cookie（如後端設定且前端無需讀取）、`sessionStorage`。**嚴禁用 `localStorage` 儲存 token。**}
+  - Token 更新：{說明前端參與方式，如「`apiClient.ts` 攔截 401 錯誤自動呼叫 token refresh endpoint。」}
+- **第三方腳本安全：**
+  - 政策：{如「所有第三方腳本（分析、廣告、widget）必須審查必要性與安全性，並以 `async/defer` 非同步載入。」}
+  - 子資源完整性（SRI）：{如「所有來自 CDN 的外部腳本與樣式，若資源穩定，必須加 SRI hash。」}
+- **前端資料驗證：**
+  - 目的：{如「前端驗證僅為 UX 提升（即時回饋），**所有關鍵驗證必須於後端進行**（詳見主架構文件）。」}
+  - 實作：{如「表單驗證用 {form_library_name，如 Formik/React Hook Form}。規則應與後端一致。」}
+- **防止點擊劫持（Clickjacking）：**
+  - 機制：{如「主要防護為 `X-Frame-Options` 或 `frame-ancestors` CSP 指令，由後端/CDN 設定。前端不應依賴 frame-busting script。」}
+- **API 金鑰外洩（如 client-side JS SDK）：**
+  - 限制：{如「Google Maps 等服務的 API key 必須於服務商後台設限（如 HTTP referrer、IP、API 限制）。」}
+  - 後端代理：{如需更高機密性或敏感操作，必須由後端 proxy，前端僅呼叫 proxy，不直接呼叫第三方服務。}
+- **安全通訊（HTTPS）：**
+  - 強制：{如「所有與後端 API 通訊必須用 HTTPS。禁止混合內容（HTTPS 頁面載入 HTTP 資源）。」}
+- **相依套件漏洞：**
+  - 流程：{如「CI 執行 `npm audit --audit-level=high`（或等效）。高/嚴重漏洞必須於部署前修復。監控 Dependabot/Snyk 警示。」}
+
+## 瀏覽器支援與漸進式增強
+
+{本節說明目標瀏覽器及於較舊或非標準環境下的行為。}
+
+- **目標瀏覽器：** {如「最新 2 版 Chrome、Firefox、Safari、Edge。若有專案需求可列明版本。不支援任何版本的 Internet Explorer。」必須明確。}
+- **Polyfill 策略：**
+  - 機制：{如「於應用進入點引入 `core-js@3`。Babel `preset-env` 依上述目標瀏覽器自動加 polyfill。」}
+  - 其他 polyfill（如有）：{如需特定功能 polyfill，請列出（如 `smoothscroll-polyfill`）。}
+- **JavaScript 需求與漸進式增強：**
+  - 基線：{如「應用核心功能需瀏覽器啟用 JavaScript。」或「主要內容（如文章、產品資訊）及主導覽無 JS 亦可瀏覽，互動功能與增強則以 JS 疊加（漸進式增強）。」請明確說明。}
+  - 無 JS 體驗（如採漸進式增強）：{說明無 JS 時哪些功能可用（如「可瀏覽頁面與導覽，表單可能無法送出或採標準 HTML 提交」）。}
+- **CSS 相容性與備援：**
+  - 工具：{如「用 Autoprefixer（PostCSS）依目標瀏覽器自動加前綴。」}
+  - 功能使用：{如「避免使用目標瀏覽器 90% 以下支援的 CSS 功能，除非有明確備援（如 `@supports` 條件）。」}
+  - **無障礙備援：** {如目標支援矩陣內較舊輔助科技不支援特定 ARIA 或進階無障礙功能時，請說明備援行為。}
 
 ## 變更紀錄
 
-| Change | Date | Version | Description | Author |
+| 變更 | 日期 | 版本 | 說明 | 作者 |
 | ------ | ---- | ------- | ----------- | ------ |
