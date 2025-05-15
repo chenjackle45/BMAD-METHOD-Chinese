@@ -1,0 +1,123 @@
+為名為「BMad DiCaster」的專案產生一個使用 React、TypeScript 和 Tailwind CSS 的 Next.js 14 (App Router) 應用程式。
+此應用程式的目的是顯示 Hacker News 貼文的每日摘要，包含一個可選的 AI 生成 podcast。
+
+**1. 整體專案背景與技術堆疊：**
+- 框架：Next.js 14+ (App Router)
+- 語言：TypeScript
+- UI 函式庫：React (19+)
+- 樣式：Tailwind CSS (v3.4+)
+- 基礎元件函式庫：Shadcn UI (最新版)。假設必要的 Shadcn UI 元件（如按鈕、卡片、對話框、音訊播放器（若有），或用於建構這些元件的基礎元件）可以輕鬆新增或已可使用。
+- 狀態管理 (用戶端)：Zustand (用於特定的用戶端元件，如 podcast 播放器)。對於初始的 scaffolding，元件層級的狀態是可以接受的。
+- 資料來源 (用於顯示內容)：Supabase (PostgreSQL)。對於此初始 v0 版本，請使用預留位置資料，或清楚指出將從 Supabase 擷取資料的位置。應優先使用 Server Components 進行資料擷取。
+
+**2. 設計系統與視覺風格：**
+- 主題：「Synthwave technical glowing purple vibes。」這意味著：
+    - 應用程式背景主要採用深色主題。
+    - 強調色：充滿活力的紫色（例如 Tailwind 的 `purple-500` 或自訂色調如 `#800080`），用於互動元素、連結、高亮顯示，以及可能用於標題的細微光暈或文字陰影。
+    - 版面配置：現代、簡約、乾淨，著重於內容可讀性和高效的資訊獲取。
+    - 字體排印：使用 Tailwind 的預設 sans-serif 字型堆疊。採用語義化 HTML 和 Tailwind 的字體排印工具程式（例如，標題使用 `text-2xl font-bold`，內文使用 `text-base`）。
+- 回應式設計：應用程式必須是行動裝置優先，並使用 Tailwind CSS 在常見的斷點（sm, md, lg, xl）上具有回應式設計。
+- 無障礙性：遵守 WCAG 2.1 Level A。這包括語義化 HTML、鍵盤導覽、足夠的色彩對比（尤其是在深色主題和紫色強調色的情況下），以及任何圖片的替代文字（儘管 MVP 主要基於文字/內容）。
+
+**3. 應用程式結構與路由 (Next.js App Router)：**
+- 主要應用程式將位於 `/` 路徑下，有效地作為 newsletter 列表頁面。
+- `/newsletters`：此路由應顯示可用的 newsletter 列表。如果根 `/` 路徑不直接提供此功能，則應重新導向至此，或此應為主要檢視。
+- `/newsletters/[newsletterId]`：此動態路由將顯示單一選定 newsletter 的內容。`[newsletterId]` 將是一個唯一的識別碼（例如 UUID）。
+
+**4. 頁面結構與關鍵元件：**
+
+**A. PageWrapper 元件 (概念性 - 若有助於一致性則建立)：**
+   - 一個包裝頁面內容的版面配置元件。
+   - 提供一致的水平內距（例如 `px-4 md:px-8`）和最大寬度容器（例如 `max-w-4xl mx-auto`），以確保內容在較大螢幕上良好置中且易於閱讀。
+   - 應包含一個簡單的頁首預留位置（例如，僅文字「BMad DiCaster」，若有標誌則包含標誌，或標誌的預留位置）和一個簡單的頁尾預留位置（例如，版權文字）。
+
+**B. Newsletter 列表頁面 (`/` 或 `/newsletters` -> `app/(web)/newsletters/page.tsx`):**
+   - 目的：顯示可用的 newsletter 列表，按日期排序（最新的在前）。
+   - 關鍵 UI 元素：
+     - 頁面標題：例如，「每日 DiCaster 更新」或「最新 Newsletters」。
+     - `NewsletterCard` 元件列表。
+   - 資料：每個卡片代表一個 newsletter，至少應顯示標題和日期。點擊卡片會導覽至 Newsletter 詳細頁面。對於 v0 版本，請使用一個包含 3-5 個預留位置 newsletter 物件的陣列（例如 `{ id: 'uuid-1', title: '科技焦點 - 2025年5月14日', date: '2025-05-14', summary_short: '今日頂尖科技新聞速覽...' }`）。
+   - 結構：
+     ```html
+     <PageWrapper>
+       <h1>[頁面標題]</h1>
+       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+         </div>
+     </PageWrapper>
+     ```
+
+**C. Newsletter 詳細頁面 (`/newsletters/[newsletterId]` -> `app/(web)/newsletters/[newsletterId]/page.tsx`):**
+   - 目的：顯示所選 newsletter 的完整內容，包括其 podcast 版本。
+   - 關鍵 UI 元素：
+     - `BackButton` 元件，用於導覽回 Newsletter 列表頁面。
+     - Newsletter 標題。
+     - Newsletter 日期。
+     - Newsletter 的完整 HTML 內容。
+     - `PodcastPlayer` 元件（如果該 newsletter 有可用的 podcast URL）。
+     - `DownloadButton` 元件，用於下載 newsletter。
+   - 資料：對於 v0 版本，請使用一個預留位置 newsletter 物件（例如 `{ id: 'uuid-1', title: '科技焦點 - 2025年5月14日', date: '2025-05-14', htmlContent: '<p>這是完整的 <b>HTML</b> 內容...</p><ul><li>要點 1</li></ul>', podcastUrl: 'placeholder_audio.mp3' }`）。
+   - 結構：
+     ```html
+     <PageWrapper>
+       <BackButton />
+       <h2>[Newsletter 標題]</h2>
+       <p class="text-sm text-gray-400">[Newsletter 日期]</p>
+       <article class="prose dark:prose-invert mt-4">
+         </article>
+       <div class="mt-6">
+         <PodcastPlayer audioUrl="{placeholder_audio.mp3 (若可用)}" />
+       </div>
+       <div class="mt-4">
+         <DownloadButton newsletterId="{newsletterId}" />
+       </div>
+     </PageWrapper>
+     ```
+     (注意：`prose` 和 `dark:prose-invert` 是 Tailwind Typography 外掛程式的類別。假設此外掛程式已安裝或可以安裝。)
+
+**5. 核心可重用元件 (放置於 `app/components/core/`):**
+
+   **a. `NewsletterCard.tsx`:**
+      - 目的：在列表檢視中顯示 newsletter 的摘要。
+      - Props: `id: string`, `title: string`, `date: string`, `summary_short?: string`。
+      - UI：使用 Shadcn UI `Card` 元件作為基礎。顯示標題、日期和摘要。整個卡片應可點擊並導覽至 `/newsletters/[id]`。
+      - 樣式：簡約風格，在懸停/聚焦時帶有 synthwave 強調色。
+
+   **b. `PodcastPlayer.tsx`:**
+      - 目的：播放與 newsletter 相關的 podcast 音訊。
+      - Props: `audioUrl: string`。
+      - UI：
+        - 如果有可用的 Shadcn UI 音訊播放器元件，請使用它。
+        - 否則，使用 HTML5 `<audio>` 元素和以 Tailwind CSS 設定樣式的自訂控制項來建立一個簡單的播放器。
+        - 控制項：播放/暫停按鈕、目前時間/總持續時間顯示、音量控制（滑桿或按鈕）和一個簡單的進度列。
+      - 狀態：使用元件層級狀態 (useState) 或一個簡單的 Zustand slice (`podcastPlayerSlice.ts`) 來管理播放/暫停、目前時間、音量的內部狀態。
+      - 樣式：乾淨、整合到頁面中，控制項帶有 synthwave 強調色。
+
+   **c. `DownloadButton.tsx`:**
+      - 目的：允許使用者下載 newsletter。
+      - Props: `newsletterId: string` (或 `downloadUrl: string`，如果偏好)。
+      - UI：使用 Shadcn UI `Button` 元件。下載圖示是加分項。
+      - 動作：對於 v0 版本，這可以是一個預留位置按鈕。在實際應用程式中，它會觸發下載。
+      - 樣式：與其他按鈕一致，synthwave 強調色。
+
+   **d. `BackButton.tsx`:**
+      - 目的：將使用者導覽至上一頁（通常是 newsletter 列表）。
+      - UI：使用 Shadcn UI `Button`（或許使用 `variant="outline"` 或 `variant="ghost"`）。理想情況下應包含「返回」圖示和/或文字「返回列表」。
+      - 動作：使用 Next.js `useRouter` hook 進行導覽 (`router.back()` 或導覽至特定路徑，如 `/newsletters`)。
+
+**6. Vercel v0 的一般指示：**
+- 為每個元件和頁面產生獨立且註解良好的檔案。
+- 在實際從 Supabase 擷取資料的地方使用預留位置資料。清楚地註解這些位置。
+- 確保基本資料夾結構符合 Next.js App Router 的最佳實踐（例如 `app/(web)/newsletters/page.tsx`, `app/components/core/NewsletterCard.tsx`）。
+- 如果需要在像素級完美樣式和功能性 scaffolding 之間做出選擇，請優先考慮後者，但應大致套用 synthwave 主題（深色底色、紫色強調色）。
+- 程式碼應乾淨、可讀且易於修改。
+
+**v0 版本預留位置 newsletter 資料結構範例：**
+```typescript
+interface PlaceholderNewsletter {
+  id: string;
+  title: string;
+  date: string; // 例如 "YYYY-MM-DD"
+  summary_short?: string; // 用於卡片檢視
+  htmlContent?: string; // 用於詳細檢視
+  podcastUrl?: string; // 指向 mp3 檔案的 URL
+}
