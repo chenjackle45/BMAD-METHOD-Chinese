@@ -1,3 +1,5 @@
+[閱讀中文版 (Read in Chinese)](../中文化/docs/instruction-chinese.md)
+
 # Instructions
 
 - [Web Agent Setup](#setting-up-web-mode-agents-in-gemini-gem-or-chatgpt-custom-gpt)

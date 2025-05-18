@@ -1,3 +1,5 @@
+[閱讀中文版 (Read in Chinese)](./中文化/README-chinese.md)
+
 # The BMAD-Method (Breakthrough Method of Agile (ai-driven) Development)
 
 Current Version: V3 Release Preview "Bmad Agent"

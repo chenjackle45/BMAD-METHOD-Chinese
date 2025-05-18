@@ -1,7 +1,9 @@
+[Read in English (閱讀英文版)](../../docs/instruction.md)
+
 # 指示說明
 
-- [Web Agent 設定](#setting-up-web-mode-agents-in-gemini-gem-or-chatgpt-custom-gpt)
-- [IDE Agent 設定](#ide-agent-setup)
+- [Web Agent 設定](#設定-web-agent-orchestrator)
+- [IDE Agent 設定](#ide-agent-設定與使用)
 - [Tasks 設定與使用](#tasks)
 
 ## 設定 Web Agent Orchestrator
@@ -12,7 +14,7 @@ V3 中的 Agent Orchestrator 利用一個建置腳本將各種 agent 資產（pe
 
 建置過程由 `build-bmad-orchestrator.js` Node.js 腳本管理。此腳本從 `build-agent-cfg.js` 讀取其設定，處理資產目錄中的檔案，並將打包的資產輸出到指定的建置目錄。
 
-快速入門：請參閱[下方說明](#running-the-build-script)
+快速入門：請參閱[下方說明](#執行建置腳本)
 
 ### 先決條件
 
