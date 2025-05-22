@@ -1,14 +1,12 @@
-[閱讀中文版 (Read in Chinese)](./中文化/README-chinese.md)
-
 # The BMAD-Method (Breakthrough Method of Agile (ai-driven) Development)
 
-Current Version: V3 Release Preview "Bmad Agent"
+Current Version: V3 Release of the "Bmad Agent"
 
-Demos of the BMad Agent and the entire workflow can be found soon in [Demos](./demos/).
+Demo of the BMad Agent entire workflow output from the web agent can be found in [Demos](./demos/readme).
 
 ## Web Quickstart Project Setup (Recommended)
 
-Orchestrator Uber BMad Agent that does it all - already [pre-built](./web-build-sample/agent-prompt.txt)! Just copy to a Gemini Gem or custom GPT as instructions, and attach the remaining files in the folder to the agent as shown in the following image.
+Orchestrator Uber BMad Agent that does it all - already [pre-built](./web-build-sample/agent-prompt.txt)! Just copy to a Gemini Gem or custom GPT as instructions, and attach the remaining files from the web-build-sample folder to the agent as shown in the following image:
 
 ![image info](./docs/images/gem-setup.png)
 
@@ -23,6 +21,8 @@ So if you want to jump right in, here are the [Setup and Usage Instructions](./d
 Starting with the latest version of the BMad Agents for the BMad Method is very easy - all you need to do is copy `bmad-agent` folder to your project. The dedicated dev and sm that existing in previous versions are still available and are in the `bmad-agent/personas` folder with the .ide.md extension. Copy and paste the contents into your specific IDE's method of configuring a custom agent mode. The dev and sm both are configured for architecture and prd artifacts to be in (project-root)/docs and stories will be generated and developed from (project-root)/docs/stories. This will remain to be the default, but a config override will follow soon.
 
 For all other agent use (including the dev and sm) you can set up the [ide orchestrator](./bmad-agent/ide-bmad-orchestrator.md) - you can ask the orchestrator bmad to become any agent you have [configured](./bmad-agent/ide-bmad-orchestrator-cfg.md).
+
+[General IDE Custom Mode Setup](./docs/ide-setup.md).
 
 ## Advancing AI-Driven Development
 
