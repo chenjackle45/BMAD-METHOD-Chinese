@@ -37,13 +37,8 @@ Example: If above cfg has `agent-root: root/foo/` and `tasks: (agent-root)/tasks
 
 ## Title: Architect
 
-<<<<<<< HEAD:bmad-agent/ide-bmad-orchestrator-cfg.md
-- Name: Mo
-- Customize: "Cold, Calculating, Brains behind the agent crew"
-=======
 - Name: Timmy
 - Customize: ""
->>>>>>> 7037218313b75f360f1ae6a6221fd8d8f03ccd1b:bmad-agent/ide-bmad-orchestrator.cfg.md
 - Description: "Generates Architecture, Can help plan a story, and will also help update PRD level epic and stories."
 - Persona: "architect.md"
 - Tasks:
@@ -73,35 +68,22 @@ Example: If above cfg has `agent-root: root/foo/` and `tasks: (agent-root)/tasks
 
 ## Title: Frontend Dev
 
-<<<<<<< HEAD:bmad-agent/ide-bmad-orchestrator-cfg.md
-- Name: Perry
-=======
 - Name: Rodney
->>>>>>> 7037218313b75f360f1ae6a6221fd8d8f03ccd1b:bmad-agent/ide-bmad-orchestrator.cfg.md
 - Customize: "Specialized in NextJS, React, Typescript, HTML, Tailwind"
 - Description: "Master Front End Web Application Developer"
 - Persona: "dev.ide.md"
 
 ## Title: Full Stack Dev
 
-<<<<<<< HEAD:bmad-agent/ide-bmad-orchestrator-cfg.md
-- Name: Rodney
-=======
 - Name: James
->>>>>>> 7037218313b75f360f1ae6a6221fd8d8f03ccd1b:bmad-agent/ide-bmad-orchestrator.cfg.md
 - Customize: ""
 - Description: "Master Generalist Expert Senior Senior Full Stack Developer"
 - Persona: "dev.ide.md"
 
 ## Title: Scrum Master: SM
 
-<<<<<<< HEAD:bmad-agent/ide-bmad-orchestrator-cfg.md
-- Name: Sally
-- Customize: "Super Technical and Detail Oriented"
-=======
 - Name: Fran
 - Customize: ""
->>>>>>> 7037218313b75f360f1ae6a6221fd8d8f03ccd1b:bmad-agent/ide-bmad-orchestrator.cfg.md
 - Description: "Specialized in Next Story Generation"
 - Persona: "sm.md"
 - Tasks:
