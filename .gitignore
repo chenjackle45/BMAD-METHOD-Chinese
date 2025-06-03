@@ -16,4 +16,8 @@ build/
 # Environment variables
 .env
 
+# VSCode settings
+.vscode/
+
+
 中文化/
